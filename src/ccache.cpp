@@ -935,7 +935,7 @@ to_cache(Context& ctx,
 
     std::ofstream result_stream;
 
-    std::vector<char> output_buffer(READ_BUFFER_SIZE);
+    std::vector<char> output_buffer(CCACHE_READ_BUFFER_SIZE);
     result_stream.rdbuf()->pubsetbuf(output_buffer.data(), output_buffer.size());
 
     result_stream.open(tmp_stderr_path, std::ios_base::binary);
@@ -948,7 +948,7 @@ to_cache(Context& ctx,
     for (auto& file : {tmp_stdout_path, tmp_stderr2}) {
       std::ifstream file_stream;
 
-      std::vector<char> read_buffer(READ_BUFFER_SIZE);
+      std::vector<char> read_buffer(CCACHE_READ_BUFFER_SIZE);
       file_stream.rdbuf()->pubsetbuf(read_buffer.data(), read_buffer.size());
 
       file_stream.open(file, std::ios_base::binary);

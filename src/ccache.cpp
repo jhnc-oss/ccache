@@ -69,9 +69,9 @@
 
 #include <algorithm>
 #include <cmath>
+#include <fstream>
 #include <limits>
 #include <memory>
-#include <fstream>
 
 #ifndef MYNAME
 #  define MYNAME "ccache"
@@ -936,7 +936,8 @@ to_cache(Context& ctx,
     std::ofstream result_stream;
 
     std::vector<char> output_buffer(CCACHE_READ_BUFFER_SIZE);
-    result_stream.rdbuf()->pubsetbuf(output_buffer.data(), output_buffer.size());
+    result_stream.rdbuf()->pubsetbuf(output_buffer.data(),
+                                     output_buffer.size());
 
     result_stream.open(tmp_stderr_path, std::ios_base::binary);
     if (!result_stream.is_open()) {
@@ -969,7 +970,8 @@ to_cache(Context& ctx,
 
     result_stream.close();
     if (!result_stream.good()) {
-      LOG("Failed at writing data into {}: {}", tmp_stderr_path, strerror(errno));
+      LOG(
+        "Failed at writing data into {}: {}", tmp_stderr_path, strerror(errno));
       throw Failure(Statistic::bad_output_file);
     }
 
@@ -978,8 +980,8 @@ to_cache(Context& ctx,
 
   // distcc-pump outputs lines like this:
   // __________Using # distcc servers in pump mode
-  if (st.size() != 0 && ctx.config.compiler_type() != CompilerType::pump &&
-      ctx.config.compiler_type() != CompilerType::cl) {
+  if (st.size() != 0 && ctx.config.compiler_type() != CompilerType::pump
+      && ctx.config.compiler_type() != CompilerType::cl) {
     LOG_RAW("Compiler produced stdout");
     throw Failure(Statistic::compiler_produced_stdout);
   }

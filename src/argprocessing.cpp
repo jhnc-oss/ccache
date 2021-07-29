@@ -403,7 +403,7 @@ process_arg(Context& ctx,
   }
 
   // MSVC /Fo with no space.
-  if (Util::starts_with(args[i], "/Fo")
+  if (util::starts_with(args[i], "/Fo")
       && config.compiler_type() == CompilerType::cl) {
     args_info.output_obj =
       Util::make_relative_path(ctx, string_view(args[i]).substr(3));

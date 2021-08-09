@@ -272,6 +272,16 @@ TEST_CASE("Config::update_from_file, error handling")
     Util::write_file("ccache.conf", "base_dir =");
     CHECK(config.update_from_file("ccache.conf"));
   }
+
+#ifdef _WIN32
+  SUBCASE("cache base dir on substed drive")
+  {
+    Util::write_file("ccache.conf", "base_dir = Z:/");
+    CHECK(config.update_from_file("ccache.conf"));
+    Util::write_file("ccache.conf", "base_dir =");
+    CHECK(config.update_from_file("ccache.conf"));
+  }
+#endif
 }
 
 TEST_CASE("Config::update_from_environment")

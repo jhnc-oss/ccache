@@ -812,9 +812,9 @@ make_relative_path(const std::string& base_dir,
 
   if (!(util::starts_with(winpath, base_dir) // C:/Abc/D <=> C:/Abc
         || util::starts_with(
-          util::to_lower(std::string(path)), // c:/AbC/D <=> c:/cbc
+          util::to_lower(std::string(path)), // C:/Abc/D <=> c:/abc
           util::to_lower(base_dir))
-        || util::starts_with(path, base_dir) // /c:/AbC/D <=> /
+        || util::starts_with(path, base_dir) // /c:/Abc/D <=> /
         )) {
     return std::string(path);
   }

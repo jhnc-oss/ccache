@@ -821,7 +821,7 @@ make_relative_path(const std::string& base_dir,
   path = winpath;
 
 #else
-  if (base_dir.empty() || !(util::starts_with(path, base_dir)){
+  if (base_dir.empty() || !util::starts_with(path, base_dir)){
     return std::string(path);
   }
 #endif

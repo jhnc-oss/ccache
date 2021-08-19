@@ -804,24 +804,20 @@ make_relative_path(const std::string& base_dir,
                    const std::string& apparent_cwd,
                    nonstd::string_view path)
 {
-  if (base_dir.empty() || !util::starts_with(path, base_dir)) {
-    return std::string(path);
-  }
-
 #ifdef _WIN32
-  std::string winpath;
-  if (path.length() >= 3 && path[0] == '/') {
-    if (isalpha(path[1]) && path[2] == '/') {
-      // Transform /c/path... to c:/path...
-      winpath = FMT("{}:/{}", path[1], path.substr(3));
-      path = winpath;
-    } else if (path[2] == ':') {
-      // Transform /c:/path to c:/path
-      winpath = std::string(path.substr(1));
-      path = winpath;
+  std::string winpath = normalize_absolute_path(path);
+  path = winpath;
+#endif
+
+  if (base_dir.empty() || !util::starts_with(path, base_dir)) {
+#ifdef _WIN32
+    if (!util::starts_with(util::to_lower(std::string(path)),
+                           util::to_lower(base_dir)))
+#endif
+    {
+      return std::string(path);
     }
   }
-#endif
 
   // The algorithm for computing relative paths below only works for existing
   // paths. If the path doesn't exist, find the first ancestor directory that
@@ -896,6 +892,16 @@ normalize_absolute_path(string_view path)
     std::string new_path(path);
     std::replace(new_path.begin(), new_path.end(), '\\', '/');
     return normalize_absolute_path(new_path);
+  }
+
+  if (path.length() >= 3 && path[0] == '/') {
+    if (isalpha(path[1]) && path[2] == '/') {
+      // Transform /c/path... to c:/path...
+      return normalize_absolute_path(FMT("{}:/{}", path[1], path.substr(3)));
+    } else if (path[2] == ':') {
+      // Transform /c:/path to c:/path
+      return normalize_absolute_path(std::string(path.substr(1)));
+    }
   }
 
   std::string drive(path.substr(0, 2));

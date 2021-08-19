@@ -24,6 +24,7 @@
 
 #include <sys/stat.h> // for mode_t
 
+#include <algorithm>
 #include <cstring>
 #include <string>
 #include <utility>
@@ -156,6 +157,18 @@ starts_with(const nonstd::string_view string, const nonstd::string_view prefix)
 inline std::string
 to_string(const std::string& string)
 {
+  return string;
+}
+
+// Convert a string into lower cases, if it is possible.
+// This is used for windows path comparisons.
+inline std::string
+to_lower(std::string string)
+{
+  std::transform(string.begin(),
+                 string.end(),
+                 string.begin(),
+                 [](unsigned char c) { return std::tolower(c); });
   return string;
 }
 

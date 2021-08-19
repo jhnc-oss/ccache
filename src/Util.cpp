@@ -805,19 +805,26 @@ make_relative_path(const std::string& base_dir,
                    nonstd::string_view path)
 {
 #ifdef _WIN32
-  std::string winpath = normalize_absolute_path(path);
-  path = winpath;
-#endif
-
-  if (base_dir.empty() || !util::starts_with(path, base_dir)) {
-#ifdef _WIN32
-    if (!util::starts_with(util::to_lower(std::string(path)),
-                           util::to_lower(base_dir)))
-#endif
-    {
-      return std::string(path);
-    }
+  if (base_dir.empty()) {
+    return std::string(path);
   }
+  std::string winpath = normalize_absolute_path(path);
+
+  if (!(util::starts_with(winpath, base_dir) // C:/Abc/D <=> C:/Abc
+        || util::starts_with(
+          util::to_lower(std::string(path)), // c:/AbC/D <=> c:/cbc
+          util::to_lower(base_dir))
+        || util::starts_with(path, base_dir) // /c:/AbC/D <=> /
+        )) {
+    return std::string(path);
+  }
+  path = winpath;
+
+#else
+  if (base_dir.empty() || !(util::starts_with(path, base_dir)){
+    return std::string(path);
+  }
+#endif
 
   // The algorithm for computing relative paths below only works for existing
   // paths. If the path doesn't exist, find the first ancestor directory that
@@ -860,7 +867,7 @@ make_relative_path(const std::string& base_dir,
 
   // No match so nothing else to do than to return the unmodified path.
   return std::string(original_path);
-}
+} // namespace Util
 
 std::string
 make_relative_path(const Context& ctx, string_view path)
@@ -904,8 +911,11 @@ normalize_absolute_path(string_view path)
     }
   }
 
-  std::string drive(path.substr(0, 2));
-  path = path.substr(2);
+  std::string drive;
+  if (path[1] == ':') {
+    drive = std::string(path.substr(0, 2));
+    path = path.substr(2);
+  }
 #endif
 
   std::string result = "/";

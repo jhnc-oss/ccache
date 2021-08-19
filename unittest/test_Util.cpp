@@ -489,6 +489,26 @@ TEST_CASE("Util::make_relative_path")
       make_relative_path(
         actual_cwd.substr(0, 3), actual_cwd, apparent_cwd, actual_cwd + "/x")
       == "./x");
+
+    std::string winpath = actual_cwd + "/x";
+    std::replace(winpath.begin(), winpath.end(), '/', '\\');
+    CHECK(make_relative_path(
+            actual_cwd.substr(0, 3), actual_cwd, apparent_cwd, winpath)
+          == "./x");
+
+    CHECK(make_relative_path(
+            "/", actual_cwd, apparent_cwd, std::string("/") + actual_cwd + "/x")
+          == "./x");
+
+    std::string uppercase = actual_cwd.substr(0, 3);
+    std::transform(uppercase.begin(),
+                   uppercase.end(),
+                   uppercase.begin(),
+                   [](unsigned char c) { return std::toupper(c); });
+    CHECK(
+      make_relative_path(uppercase, actual_cwd, apparent_cwd, actual_cwd + "/x")
+      == "./x");
+
 #else
     CHECK(make_relative_path("/", actual_cwd, apparent_cwd, actual_cwd + "/x")
           == "./x");

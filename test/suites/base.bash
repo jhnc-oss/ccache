@@ -548,28 +548,32 @@ fi
     fi
 
     # -------------------------------------------------------------------------
+
     TEST "Directory is not hashed if using -gz=zlib"
 
-    $REAL_COMPILER -E test1.c -gz=zlib >preprocessed.i 2>/dev/null
-    if [ -s preprocessed.i ] && ! fgrep -q $PWD preprocessed.i; then
-        mkdir dir1 dir2
-        cp test1.c dir1
-        cp test1.c dir2
+    $REAL_COMPILER  test1.c -gz=zlib -o /dev/null 2>/dev/null 
+    if [ $? -eq 0 ]; then
+        # run test only if -gz=zlib is supported
+        $REAL_COMPILER -E test1.c -gz=zlib >preprocessed.i 2>/dev/null
+        if [ "$exit_code" == "0" ] && [ -s preprocessed.i ] && ! fgrep -q $PWD preprocessed.i; then
+            mkdir dir1 dir2
+            cp test1.c dir1
+            cp test1.c dir2
 
-        cd dir1
-        $CCACHE_COMPILE -c test1.c -gz=zlib
-        expect_stat preprocessed_cache_hit 0
-        expect_stat cache_miss 1
-        $CCACHE_COMPILE -c test1.c -gz=zlib
-        expect_stat preprocessed_cache_hit 1
-        expect_stat cache_miss 1
+            cd dir1
+            $CCACHE_COMPILE -c test1.c -gz=zlib
+            expect_stat preprocessed_cache_hit 0
+            expect_stat cache_miss 1
+            $CCACHE_COMPILE -c test1.c -gz=zlib
+            expect_stat preprocessed_cache_hit 1
+            expect_stat cache_miss 1
 
-        cd ../dir2
-        $CCACHE_COMPILE -c test1.c -gz=zlib
-        expect_stat preprocessed_cache_hit 2
-        expect_stat cache_miss 1
+            cd ../dir2
+            $CCACHE_COMPILE -c test1.c -gz=zlib
+            expect_stat preprocessed_cache_hit 2
+            expect_stat cache_miss 1
+        fi
     fi
-
     # -------------------------------------------------------------------------
     TEST "CCACHE_NOHASHDIR"
 

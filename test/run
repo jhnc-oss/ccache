@@ -177,7 +177,7 @@ expect_stat() {
         if [[ $key == $stat ]]; then
             break
         fi
-    done < <($CCACHE --print-stats)
+    done < <($CCACHE --print-stats | sed -e 's/\r//g' )
 
     if [ "$expected_value" != "$value" ]; then
         test_failed_internal "Expected $stat to be $expected_value, actual $value"

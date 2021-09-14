@@ -216,7 +216,13 @@ expect_equal_text_content() {
         test_failed_internal "expect_equal_text_content: $2 missing"
     fi
     if ! cmp -s "$1" "$2"; then
-        test_failed_internal "$1 and $2 differ: $(echo; diff -u "$1" "$2")"
+        if $HOST_OS_WINDOWS  && diff -u --strip-trailing-cr "$1" "$2" > /dev/null ; then
+            if $verbose; then
+                echo "WARNING: $1 and $2 with differ line endings."
+            fi
+        else
+            test_failed_internal "$1 and $2 differ: $(echo; diff -u "$1" "$2")"
+        fi
     fi
 }
 

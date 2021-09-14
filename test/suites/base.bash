@@ -574,25 +574,28 @@ fi
             expect_stat cache_miss 1
         fi
     fi
+    
     # -------------------------------------------------------------------------
     TEST "CCACHE_NOHASHDIR"
 
-    mkdir dir1 dir2
-    cp test1.c dir1
-    cp test1.c dir2
+    if [ -z "${WIN_XFAIL}" ]; then
+        mkdir dir1 dir2
+        cp test1.c dir1
+        cp test1.c dir2
 
-    cd dir1
-    CCACHE_NOHASHDIR=1 $CCACHE_COMPILE -c test1.c -g
-    expect_stat preprocessed_cache_hit 0
-    expect_stat cache_miss 1
-    CCACHE_NOHASHDIR=1 $CCACHE_COMPILE -c test1.c -g
-    expect_stat preprocessed_cache_hit 1
-    expect_stat cache_miss 1
+        cd dir1
+        CCACHE_NOHASHDIR=1 $CCACHE_COMPILE -c test1.c -g
+        expect_stat preprocessed_cache_hit 0
+        expect_stat cache_miss 1
+        CCACHE_NOHASHDIR=1 $CCACHE_COMPILE -c test1.c -g
+        expect_stat preprocessed_cache_hit 1
+        expect_stat cache_miss 1
 
-    cd ../dir2
-    CCACHE_NOHASHDIR=1 $CCACHE_COMPILE -c test1.c -g
-    expect_stat preprocessed_cache_hit 2
-    expect_stat cache_miss 1
+        cd ../dir2
+        CCACHE_NOHASHDIR=1 $CCACHE_COMPILE -c test1.c -g
+        expect_stat preprocessed_cache_hit 2
+        expect_stat cache_miss 1
+    fi
 
     # -------------------------------------------------------------------------
     TEST "CCACHE_EXTRAFILES"
@@ -633,43 +636,43 @@ fi
 
     # -------------------------------------------------------------------------
     TEST "CCACHE_PREFIX"
-
-    cat <<'EOF' >prefix-a
+    if [ -z "${WIN_XFAIL}" ];then
+        cat <<'EOF' >prefix-a
 #!/bin/sh
 echo a >prefix.result
 exec "$@"
 EOF
-    cat <<'EOF' >prefix-b
+         <<'EOF' >prefix-b
 #!/bin/sh
 echo b >>prefix.result
 exec "$@"
 EOF
-    chmod +x prefix-a prefix-b
-    cat <<'EOF' >file.c
+        chmod +x prefix-a prefix-b
+        cat <<'EOF' >file.c
 int foo;
 EOF
-    PATH=.:$PATH CCACHE_PREFIX="prefix-a prefix-b" $CCACHE_COMPILE -c file.c
-    expect_stat direct_cache_hit 0
-    expect_stat preprocessed_cache_hit 0
-    expect_stat cache_miss 1
-    expect_content prefix.result "a
+        PATH=.:$PATH CCACHE_PREFIX="prefix-a prefix-b" $CCACHE_COMPILE -c file.c
+        expect_stat direct_cache_hit 0
+        expect_stat preprocessed_cache_hit 0
+        expect_stat cache_miss 1
+        expect_content prefix.result "a
 b"
 
-    PATH=.:$PATH CCACHE_PREFIX="prefix-a prefix-b" $CCACHE_COMPILE -c file.c
-    expect_stat direct_cache_hit 0
-    expect_stat preprocessed_cache_hit 1
-    expect_stat cache_miss 1
-    expect_content prefix.result "a
+        PATH=.:$PATH CCACHE_PREFIX="prefix-a prefix-b" $CCACHE_COMPILE -c file.c
+        expect_stat direct_cache_hit 0
+        expect_stat preprocessed_cache_hit 1
+        expect_stat cache_miss 1
+        expect_content prefix.result "a
 b"
 
-    rm -f prefix.result
-    PATH=.:$PATH CCACHE_PREFIX_CPP="prefix-a prefix-b" $CCACHE_COMPILE -c file.c
-    expect_stat direct_cache_hit 0
-    expect_stat preprocessed_cache_hit 2
-    expect_stat cache_miss 1
-    expect_content prefix.result "a
+        rm -f prefix.result
+        PATH=.:$PATH CCACHE_PREFIX_CPP="prefix-a prefix-b" $CCACHE_COMPILE -c file.c
+        expect_stat direct_cache_hit 0
+        expect_stat preprocessed_cache_hit 2
+        expect_stat cache_miss 1
+        expect_content prefix.result "a
 b"
-
+    fi
     # -------------------------------------------------------------------------
     TEST "Files in cache"
 
@@ -739,16 +742,17 @@ b"
     expect_stat unsupported_source_language 1
 
     # -------------------------------------------------------------------------
-    TEST "-x c -c /dev/null"
+    if [ -z "${WIN_XFAIL}" ]; then
+        TEST "-x c -c /dev/null"
 
-    $CCACHE_COMPILE -x c -c /dev/null -o null.o 2>/dev/null
-    expect_stat preprocessed_cache_hit 0
-    expect_stat cache_miss 1
+        $CCACHE_COMPILE -x c -c /dev/null -o null.o 2>/dev/null
+        expect_stat preprocessed_cache_hit 0
+        expect_stat cache_miss 1
 
-    $CCACHE_COMPILE -x c -c /dev/null -o null.o 2>/dev/null
-    expect_stat preprocessed_cache_hit 1
-    expect_stat cache_miss 1
-
+        $CCACHE_COMPILE -x c -c /dev/null -o null.o 2>/dev/null
+        expect_stat preprocessed_cache_hit 1
+        expect_stat cache_miss 1
+    fi
     # -------------------------------------------------------------------------
     TEST "-D not hashed"
 
@@ -858,17 +862,18 @@ EOF
 
     # -------------------------------------------------------------------------
     TEST "CCACHE_PATH"
-
-    override_path=`pwd`/override_path
-    mkdir $override_path
-    cat >$override_path/cc <<EOF
+    if [ -z "${WIN_XFAIL}" ]; then
+        override_path=`pwd`/override_path
+        mkdir $override_path
+        cat >$override_path/cc <<EOF
 #!/bin/sh
 touch override_path_compiler_executed
 EOF
-    chmod +x $override_path/cc
-    CCACHE_PATH=$override_path $CCACHE cc -c test1.c
-    if [ ! -f override_path_compiler_executed ]; then
-        test_failed "CCACHE_PATH had no effect"
+        chmod +x $override_path/cc
+        CCACHE_PATH=$override_path $CCACHE cc -c test1.c
+        if [ ! -f override_path_compiler_executed ]; then
+            test_failed "CCACHE_PATH had no effect"
+        fi
     fi
 
     # -------------------------------------------------------------------------
@@ -977,37 +982,38 @@ EOF
 
     # -------------------------------------------------------------------------
     TEST "CCACHE_COMPILERCHECK=command"
-
-    cat >compiler.sh <<EOF
+    if [ -z "${WIN_XFAIL}" ]; then
+        cat >compiler.sh <<EOF
 #!/bin/sh
 CCACHE_DISABLE=1 # If $COMPILER happens to be a ccache symlink...
 export CCACHE_DISABLE
 exec $COMPILER "\$@"
 EOF
-    chmod +x compiler.sh
+        chmod +x compiler.sh
 
-    CCACHE_COMPILERCHECK='echo %compiler%' $CCACHE ./compiler.sh -c test1.c
-    expect_stat preprocessed_cache_hit 0
-    expect_stat cache_miss 1
+        CCACHE_COMPILERCHECK='echo %compiler%' $CCACHE ./compiler.sh -c test1.c
+        expect_stat preprocessed_cache_hit 0
+        expect_stat cache_miss 1
 
-    echo "# Compiler upgrade" >>compiler.sh
-    CCACHE_COMPILERCHECK="echo ./compiler.sh" $CCACHE ./compiler.sh -c test1.c
-    expect_stat preprocessed_cache_hit 1
-    expect_stat cache_miss 1
+        echo "# Compiler upgrade" >>compiler.sh
+        CCACHE_COMPILERCHECK="echo ./compiler.sh" $CCACHE ./compiler.sh -c test1.c
+        expect_stat preprocessed_cache_hit 1
+        expect_stat cache_miss 1
 
-    cat <<EOF >foobar.sh
+        cat <<EOF >foobar.sh
 #!/bin/sh
 echo foo
 echo bar
 EOF
-    chmod +x foobar.sh
-    CCACHE_COMPILERCHECK='./foobar.sh' $CCACHE ./compiler.sh -c test1.c
-    expect_stat preprocessed_cache_hit 1
-    expect_stat cache_miss 2
+        chmod +x foobar.sh
+        CCACHE_COMPILERCHECK='./foobar.sh' $CCACHE ./compiler.sh -c test1.c
+        expect_stat preprocessed_cache_hit 1
+        expect_stat cache_miss 2
 
-    CCACHE_COMPILERCHECK='echo foo; echo bar' $CCACHE ./compiler.sh -c test1.c
-    expect_stat preprocessed_cache_hit 2
-    expect_stat cache_miss 2
+        CCACHE_COMPILERCHECK='echo foo; echo bar' $CCACHE ./compiler.sh -c test1.c
+        expect_stat preprocessed_cache_hit 2
+        expect_stat cache_miss 2
+    fi
 
     # -------------------------------------------------------------------------
     TEST "CCACHE_COMPILERCHECK=unknown_command"
@@ -1088,23 +1094,24 @@ fi
 
     # -------------------------------------------------------------------------
     TEST "No object file due to bad prefix"
-
-    cat <<'EOF' >test_no_obj.c
+    if [ -z "${WIN_XFAIL}" ]; then
+        cat <<'EOF' >test_no_obj.c
 int test_no_obj;
 EOF
-    cat <<'EOF' >no-object-prefix
+        cat <<'EOF' >no-object-prefix
 #!/bin/sh
 # Emulate no object file from the compiler.
 EOF
-    chmod +x no-object-prefix
-    CCACHE_PREFIX=$(pwd)/no-object-prefix $CCACHE_COMPILE -c test_no_obj.c
-    expect_stat compiler_produced_no_output 1
+        chmod +x no-object-prefix
+        CCACHE_PREFIX=$(pwd)/no-object-prefix $CCACHE_COMPILE -c test_no_obj.c
+        expect_stat compiler_produced_no_output 1
 
-    CCACHE_PREFIX=$(pwd)/no-object-prefix $CCACHE_COMPILE -c test1.c
-    expect_stat preprocessed_cache_hit 0
-    expect_stat cache_miss 0
-    expect_stat files_in_cache 0
-    expect_stat compiler_produced_no_output 2
+        CCACHE_PREFIX=$(pwd)/no-object-prefix $CCACHE_COMPILE -c test1.c
+        expect_stat preprocessed_cache_hit 0
+        expect_stat cache_miss 0
+        expect_stat files_in_cache 0
+        expect_stat compiler_produced_no_output 2
+    fi
 
     # -------------------------------------------------------------------------
     TEST "No object file due to -fsyntax-only"
@@ -1129,29 +1136,31 @@ EOF
 
     # -------------------------------------------------------------------------
     TEST "Empty object file"
-
-    cat <<'EOF' >test_empty_obj.c
+    if [ -z "${WIN_XFAIL}" ]; then
+        cat <<'EOF' >test_empty_obj.c
 int test_empty_obj;
 EOF
-    cat <<'EOF' >empty-object-prefix
+        cat <<'EOF' >empty-object-prefix
 #!/bin/sh
 # Emulate empty object file from the compiler.
 touch test_empty_obj.o
 EOF
-    chmod +x empty-object-prefix
-    CCACHE_PREFIX=`pwd`/empty-object-prefix $CCACHE_COMPILE -c test_empty_obj.c
-    expect_stat compiler_produced_empty_output 1
+        chmod +x empty-object-prefix
+        CCACHE_PREFIX=`pwd`/empty-object-prefix $CCACHE_COMPILE -c test_empty_obj.c
+        expect_stat compiler_produced_empty_output 1
+    fi
 
     # -------------------------------------------------------------------------
     TEST "Output to /dev/null"
+    if [ -z "${WIN_XFAIL}" ]; then
+        $CCACHE_COMPILE -c test1.c
+        expect_stat preprocessed_cache_hit 0
+        expect_stat cache_miss 1
 
-    $CCACHE_COMPILE -c test1.c
-    expect_stat preprocessed_cache_hit 0
-    expect_stat cache_miss 1
-
-    $CCACHE_COMPILE -c test1.c -o /dev/null
-    expect_stat preprocessed_cache_hit 1
-    expect_stat cache_miss 1
+        $CCACHE_COMPILE -c test1.c -o /dev/null
+        expect_stat preprocessed_cache_hit 1
+        expect_stat cache_miss 1
+    fi
 
     # -------------------------------------------------------------------------
     TEST "Caching stderr"
@@ -1164,7 +1173,7 @@ int stderr(void)
 EOF
     $REAL_COMPILER -c -Wall -W -c stderr.c 2>reference_stderr.txt
     $CCACHE_COMPILE -Wall -W -c stderr.c 2>stderr.txt
-    expect_equal_content reference_stderr.txt stderr.txt
+    expect_equal_text_content reference_stderr.txt stderr.txt
 
     # -------------------------------------------------------------------------
     TEST "Merging stderr"
@@ -1206,13 +1215,13 @@ EOF
     $CCACHE_COMPILE -c test.c -MMD 2>test.stderr
     expect_stat preprocessed_cache_hit 0
     expect_stat cache_miss 1
-    expect_equal_content reference.stderr test.stderr
+    expect_equal_text_content reference.stderr test.stderr
     expect_equal_content reference.d test.d
 
     $CCACHE_COMPILE -c test.c -MMD 2>test.stderr
     expect_stat preprocessed_cache_hit 1
     expect_stat cache_miss 1
-    expect_equal_content reference.stderr test.stderr
+    expect_equal_text_content reference.stderr test.stderr
     expect_equal_content reference.d test.d
 
     # -------------------------------------------------------------------------
@@ -1364,9 +1373,9 @@ EOF
     done
 
     # -------------------------------------------------------------------------
-    TEST "Buggy GCC 6 cpp"
-
-    cat >buggy-cpp <<EOF
+    if [ -z "${WIN_XFAIL}" ]; then     
+        TEST "Buggy GCC 6 cpp"
+        cat >buggy-cpp.sh <<EOF
 #!/bin/sh
 CCACHE_DISABLE=1 # If $COMPILER happens to be a ccache symlink...
 export CCACHE_DISABLE
@@ -1381,21 +1390,21 @@ else
 fi
 exit 0
 EOF
-    cat <<'EOF' >file.c
+        cat <<'EOF' >file.c
 int foo;
 EOF
-    chmod +x buggy-cpp
+        chmod +x buggy-cpp.sh
 
-    $CCACHE ./buggy-cpp -c file.c
-    expect_stat direct_cache_hit 0
-    expect_stat preprocessed_cache_hit 0
-    expect_stat cache_miss 1
+        $CCACHE ./buggy-cpp.sh -c file.c
+        expect_stat direct_cache_hit 0
+        expect_stat preprocessed_cache_hit 0
+        expect_stat cache_miss 1
 
-    $CCACHE ./buggy-cpp -DNOT_AFFECTING=1 -c file.c
-    expect_stat direct_cache_hit 0
-    expect_stat preprocessed_cache_hit 1
-    expect_stat cache_miss 1
-
+        $CCACHE ./buggy-cpp.sh -DNOT_AFFECTING=1 -c file.c
+        expect_stat direct_cache_hit 0
+        expect_stat preprocessed_cache_hit 1
+        expect_stat cache_miss 1
+    fi
     # -------------------------------------------------------------------------
 if ! $HOST_OS_WINDOWS; then
     TEST ".incbin"

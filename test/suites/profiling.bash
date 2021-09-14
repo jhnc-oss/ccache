@@ -69,85 +69,87 @@ SUITE_profiling() {
     expect_stat cache_miss 3
 
     # -------------------------------------------------------------------------
-    TEST "-fprofile-use=dir"
+    if [ -z "${WIN_XFAIL}" ]; then
+        TEST "-fprofile-use=dir"
 
-    mkdir data
+        mkdir data
 
-    $CCACHE_COMPILE -fprofile-generate=data -c test.c
-    expect_stat direct_cache_hit 0
-    expect_stat cache_miss 1
+        $CCACHE_COMPILE -fprofile-generate=data -c test.c
+        expect_stat direct_cache_hit 0
+        expect_stat cache_miss 1
 
-    $COMPILER -fprofile-generate test.o -o test
+        $COMPILER -fprofile-generate test.o -o test
 
-    ./test
-    merge_profiling_data data
+        ./test
+        merge_profiling_data data
 
-    $CCACHE_COMPILE -fprofile-use=data -c test.c
-    expect_stat direct_cache_hit 0
-    expect_stat cache_miss 2
+        $CCACHE_COMPILE -fprofile-use=data -c test.c
+        expect_stat direct_cache_hit 0
+        expect_stat cache_miss 2
 
-    $CCACHE_COMPILE -fprofile-use=data -c test.c
-    expect_stat direct_cache_hit 1
-    expect_stat cache_miss 2
+        $CCACHE_COMPILE -fprofile-use=data -c test.c
+        expect_stat direct_cache_hit 1
+        expect_stat cache_miss 2
 
-    ./test
-    merge_profiling_data data
+        ./test
+        merge_profiling_data data
 
-    $CCACHE_COMPILE -fprofile-use=data -c test.c
-    expect_stat direct_cache_hit 1
-    expect_stat cache_miss 3
-
+        $CCACHE_COMPILE -fprofile-use=data -c test.c
+        expect_stat direct_cache_hit 1
+        expect_stat cache_miss 3
+    fi
     # -------------------------------------------------------------------------
-    TEST "-fprofile-generate=dir in different directories"
+    if [ -z "${WIN_XFAIL}" ]; then
+        TEST "-fprofile-generate=dir in different directories"
 
-    mkdir -p dir1/data dir2/data
+        mkdir -p dir1/data dir2/data
 
-    cd dir1
+        cd dir1
 
-    $CCACHE_COMPILE -Werror -fprofile-generate=data -c ../test.c \
-        || test_failed "compilation error"
-    expect_stat direct_cache_hit 0
-    expect_stat cache_miss 1
+        $CCACHE_COMPILE -Werror -fprofile-generate=data -c ../test.c \
+            || test_failed "compilation error"
+        expect_stat direct_cache_hit 0
+        expect_stat cache_miss 1
 
-    $CCACHE_COMPILE -Werror -fprofile-generate=data -c ../test.c \
-        || test_failed "compilation error"
-    expect_stat direct_cache_hit 1
-    expect_stat cache_miss 1
+        $CCACHE_COMPILE -Werror -fprofile-generate=data -c ../test.c \
+            || test_failed "compilation error"
+        expect_stat direct_cache_hit 1
+        expect_stat cache_miss 1
 
-    $COMPILER -Werror -fprofile-generate test.o -o test \
-        || test_failed "compilation error"
+        $COMPILER -Werror -fprofile-generate test.o -o test \
+            || test_failed "compilation error"
 
-    ./test || test_failed "execution error"
-    merge_profiling_data data
+        ./test || test_failed "execution error"
+        merge_profiling_data data
 
-    $CCACHE_COMPILE -Werror -fprofile-use=data -c ../test.c \
-        || test_failed "compilation error"
-    expect_stat direct_cache_hit 1
-    expect_stat cache_miss 2
+        $CCACHE_COMPILE -Werror -fprofile-use=data -c ../test.c \
+            || test_failed "compilation error"
+        expect_stat direct_cache_hit 1
+        expect_stat cache_miss 2
 
-    cd ../dir2
+        cd ../dir2
 
-    $CCACHE_COMPILE -Werror -fprofile-generate=data -c ../test.c \
-        || test_failed "compilation error"
-    expect_stat direct_cache_hit 1
-    expect_stat cache_miss 3
+        $CCACHE_COMPILE -Werror -fprofile-generate=data -c ../test.c \
+            || test_failed "compilation error"
+        expect_stat direct_cache_hit 1
+        expect_stat cache_miss 3
 
-    $CCACHE_COMPILE -Werror -fprofile-generate=data -c ../test.c \
-        || test_failed "compilation error"
-    expect_stat direct_cache_hit 2
-    expect_stat cache_miss 3
+        $CCACHE_COMPILE -Werror -fprofile-generate=data -c ../test.c \
+            || test_failed "compilation error"
+        expect_stat direct_cache_hit 2
+        expect_stat cache_miss 3
 
-    $COMPILER -Werror -fprofile-generate test.o -o test \
-        || test_failed "compilation error"
+        $COMPILER -Werror -fprofile-generate test.o -o test \
+            || test_failed "compilation error"
 
-    ./test || test_failed "execution error"
-    merge_profiling_data data
+        ./test || test_failed "execution error"
+        merge_profiling_data data
 
-    $CCACHE_COMPILE -Werror -fprofile-use=data -c ../test.c \
-        || test_failed "compilation error"
-    # Note: No expect_stat here since GCC and Clang behave differently – just
-    # check that the compiler doesn't warn about not finding the profile data.
-
+        $CCACHE_COMPILE -Werror -fprofile-use=data -c ../test.c \
+            || test_failed "compilation error"
+        # Note: No expect_stat here since GCC and Clang behave differently – just
+        # check that the compiler doesn't warn about not finding the profile data.
+    fi
     # -------------------------------------------------------------------------
     TEST "-ftest-coverage with -fprofile-dir"
 

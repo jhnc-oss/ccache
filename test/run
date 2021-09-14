@@ -285,6 +285,12 @@ expect_content() {
         test_failed_internal "$file not found"
     fi
     if [ "$(cat $file)" != "$content" ]; then
+        if $HOST_OS_WINDOWS && [ "$(cat $file | sed -e 's/\r//g' )" == "$content" ]; then
+            if $verbose; then
+                echo "WARNING: content has differ line endings."
+            fi
+            return
+        fi
         test_failed_internal "Bad content of $file.\nExpected: $content\nActual: $(cat $file)"
     fi
 }

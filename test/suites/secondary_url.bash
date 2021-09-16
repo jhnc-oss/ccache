@@ -25,9 +25,11 @@ SUITE_secondary_url() {
     expect_contains stderr.log "Cannot parse URL"
 
     # -------------------------------------------------------------------------
-    TEST "Reject missing scheme"
+    if $RUN_WIN_XFAIL; then 
+        TEST "Reject missing scheme"
 
-    export CCACHE_SECONDARY_STORAGE="/qwerty"
-    $CCACHE_COMPILE -c test.c 2>stderr.log
-    expect_contains stderr.log "URL scheme must not be empty"
+        export CCACHE_SECONDARY_STORAGE="/qwerty"
+        $CCACHE_COMPILE -c test.c 2>stderr.log
+        expect_contains stderr.log "URL scheme must not be empty"
+    fi
 }

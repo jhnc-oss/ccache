@@ -579,36 +579,37 @@ EOF
     rm -f third_name.d
 
     # -------------------------------------------------------------------------
-    TEST "MF /dev/null"
+    if $RUN_WIN_XFAIL; then 
+        TEST "MF /dev/null"
 
-    $CCACHE_COMPILE -c -MD -MF /dev/null test.c
-    expect_stat direct_cache_hit 0
-    expect_stat preprocessed_cache_hit 0
-    expect_stat cache_miss 1
-    expect_stat files_in_cache 2 # result + manifest
+        $CCACHE_COMPILE -c -MD -MF /dev/null test.c
+        expect_stat direct_cache_hit 0
+        expect_stat preprocessed_cache_hit 0
+        expect_stat cache_miss 1
+        expect_stat files_in_cache 2 # result + manifest
 
-    $CCACHE_COMPILE -c -MD -MF /dev/null test.c
-    expect_stat direct_cache_hit 1
-    expect_stat preprocessed_cache_hit 0
-    expect_stat cache_miss 1
-    expect_stat files_in_cache 2
+        $CCACHE_COMPILE -c -MD -MF /dev/null test.c
+        expect_stat direct_cache_hit 1
+        expect_stat preprocessed_cache_hit 0
+        expect_stat cache_miss 1
+        expect_stat files_in_cache 2
 
-    $CCACHE_COMPILE -c -MD -MF test.d test.c
-    expect_stat direct_cache_hit 1
-    expect_stat preprocessed_cache_hit 0
-    expect_stat cache_miss 2
-    expect_stat files_in_cache 4
-    expect_equal_content test.d expected.d
+        $CCACHE_COMPILE -c -MD -MF test.d test.c
+        expect_stat direct_cache_hit 1
+        expect_stat preprocessed_cache_hit 0
+        expect_stat cache_miss 2
+        expect_stat files_in_cache 4
+        expect_equal_content test.d expected.d
 
-    rm -f test.d
+        rm -f test.d
 
-    $CCACHE_COMPILE -c -MD -MF test.d test.c
-    expect_stat direct_cache_hit 2
-    expect_stat preprocessed_cache_hit 0
-    expect_stat cache_miss 2
-    expect_stat files_in_cache 4
-    expect_equal_content test.d expected.d
-
+        $CCACHE_COMPILE -c -MD -MF test.d test.c
+        expect_stat direct_cache_hit 2
+        expect_stat preprocessed_cache_hit 0
+        expect_stat cache_miss 2
+        expect_stat files_in_cache 4
+        expect_equal_content test.d expected.d
+    fi
     # -------------------------------------------------------------------------
     TEST "stderr from both preprocessor and compiler"
 

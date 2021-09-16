@@ -576,9 +576,9 @@ fi
     fi
     
     # -------------------------------------------------------------------------
-    TEST "CCACHE_NOHASHDIR"
+    if $RUN_WIN_XFAIL; then    
+        TEST "CCACHE_NOHASHDIR"
 
-    if ${RUN_WIN_XFAIL}; then
         mkdir dir1 dir2
         cp test1.c dir1
         cp test1.c dir2
@@ -636,7 +636,7 @@ fi
 
     # -------------------------------------------------------------------------
     TEST "CCACHE_PREFIX"
-    if ${RUN_WIN_XFAIL};then
+    if $RUN_WIN_XFAIL;then
         cat <<'EOF' >prefix-a
 #!/bin/sh
 echo a >prefix.result
@@ -742,7 +742,7 @@ b"
     expect_stat unsupported_source_language 1
 
     # -------------------------------------------------------------------------
-    if ${RUN_WIN_XFAIL}; then
+    if $RUN_WIN_XFAIL; then
         TEST "-x c -c /dev/null"
 
         $CCACHE_COMPILE -x c -c /dev/null -o null.o 2>/dev/null
@@ -862,7 +862,7 @@ EOF
 
     # -------------------------------------------------------------------------
     TEST "CCACHE_PATH"
-    if ${RUN_WIN_XFAIL}; then
+    if $RUN_WIN_XFAIL; then
         override_path=`pwd`/override_path
         mkdir $override_path
         cat >$override_path/cc <<EOF
@@ -982,7 +982,7 @@ EOF
 
     # -------------------------------------------------------------------------
     TEST "CCACHE_COMPILERCHECK=command"
-    if ${RUN_WIN_XFAIL}; then
+    if $RUN_WIN_XFAIL; then
         cat >compiler.sh <<EOF
 #!/bin/sh
 CCACHE_DISABLE=1 # If $COMPILER happens to be a ccache symlink...
@@ -1094,7 +1094,7 @@ fi
 
     # -------------------------------------------------------------------------
     TEST "No object file due to bad prefix"
-    if ${RUN_WIN_XFAIL}; then
+    if $RUN_WIN_XFAIL; then
         cat <<'EOF' >test_no_obj.c
 int test_no_obj;
 EOF
@@ -1136,7 +1136,7 @@ EOF
 
     # -------------------------------------------------------------------------
     TEST "Empty object file"
-    if ${RUN_WIN_XFAIL}; then
+    if $RUN_WIN_XFAIL; then
         cat <<'EOF' >test_empty_obj.c
 int test_empty_obj;
 EOF
@@ -1152,7 +1152,7 @@ EOF
 
     # -------------------------------------------------------------------------
     TEST "Output to /dev/null"
-    if ${RUN_WIN_XFAIL}; then
+    if $RUN_WIN_XFAIL; then
         $CCACHE_COMPILE -c test1.c
         expect_stat preprocessed_cache_hit 0
         expect_stat cache_miss 1
@@ -1373,7 +1373,7 @@ EOF
     done
 
     # -------------------------------------------------------------------------
-    if ${RUN_WIN_XFAIL}; then     
+    if $RUN_WIN_XFAIL; then     
         TEST "Buggy GCC 6 cpp"
         cat >buggy-cpp.sh <<EOF
 #!/bin/sh

@@ -642,7 +642,7 @@ fi
 echo a >prefix.result
 exec "$@"
 EOF
-         <<'EOF' >prefix-b
+        cat <<'EOF' >prefix-b
 #!/bin/sh
 echo b >>prefix.result
 exec "$@"

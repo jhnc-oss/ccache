@@ -174,16 +174,16 @@ expect_stat() {
     local value=""
 
     if $HOST_OS_WINDOWS ; then 
-        sed_filter="'s/\r//g'"
+        filter="sed -e s/\r//g"
     else
-        sed_filter="'s///g'"
+        filter=cat
     fi
-    
+
     while read -r key value; do
         if [[ $key == $stat ]]; then
             break
         fi
-    done < <($CCACHE --print-stats | sed -e $sed_filter )
+    done < <($CCACHE --print-stats | $filter )
     
 
     if [ "$expected_value" != "$value" ]; then

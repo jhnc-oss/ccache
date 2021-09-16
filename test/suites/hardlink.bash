@@ -49,7 +49,7 @@ SUITE_hardlink() {
     expect_stat files_in_cache 2
 
     # -------------------------------------------------------------------------
-    if [ -z "${WIN_XFAIL}" ]; then
+    if ${RUN_WIN_XFAIL}; then
         TEST "Overwrite assembler"
 
         generate_code 1 test1.c
@@ -80,7 +80,7 @@ SUITE_hardlink() {
         expect_equal_object_files reference_test1.o test1.o
     fi
     # -------------------------------------------------------------------------
-    if [ -z "${WIN_XFAIL}" ]; then
+    if ${RUN_WIN_XFAIL}; then
         TEST "Automake depend move"
 
         unset CCACHE_NODIRECT
@@ -96,7 +96,7 @@ SUITE_hardlink() {
         mv test1.d.tmp test1.d || test_failed "second mv failed"
     fi
     # -------------------------------------------------------------------------
-    if [ -z "${WIN_XFAIL}" ]; then
+    if ${RUN_WIN_XFAIL}; then
         TEST ".d file corrupted by compiler"
 
         unset CCACHE_NODIRECT

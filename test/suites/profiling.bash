@@ -69,7 +69,7 @@ SUITE_profiling() {
     expect_stat cache_miss 3
 
     # -------------------------------------------------------------------------
-    if [ -z "${WIN_XFAIL}" ]; then
+    if ${RUN_WIN_XFAIL}; then
         TEST "-fprofile-use=dir"
 
         mkdir data
@@ -99,7 +99,7 @@ SUITE_profiling() {
         expect_stat cache_miss 3
     fi
     # -------------------------------------------------------------------------
-    if [ -z "${WIN_XFAIL}" ]; then
+    if ${RUN_WIN_XFAIL}; then
         TEST "-fprofile-generate=dir in different directories"
 
         mkdir -p dir1/data dir2/data

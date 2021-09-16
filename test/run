@@ -556,6 +556,12 @@ if $HOST_OS_WINDOWS; then
 else
     PATH_DELIM=":"
 fi
+RUN_WIN_XFAIL=true
+if $HOST_OS_WINDOWS &&  [ -z "${RUN_FAULTY_TESTS}" ] ; then
+    RUN_WIN_XFAIL=false
+fi
+
+
 
 if [[ $OSTYPE = msys* ]]; then
     # Native symlink support for Windows.

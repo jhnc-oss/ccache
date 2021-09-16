@@ -1,3 +1,9 @@
+SUITE_basedir_PROBE() {
+    if ! $RUN_WIN_XFAIL; then
+        echo "basedir is broken on Windows"
+        return
+    fi
+}
 SUITE_basedir_SETUP() {
     unset CCACHE_NODIRECT
 

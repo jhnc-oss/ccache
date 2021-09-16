@@ -36,7 +36,7 @@ SUITE_profiling_gcc() {
     expect_stat cache_miss 3
 
     # -------------------------------------------------------------------------
-    if [ -z "${WIN_XFAIL}" ]; then
+    if ${RUN_WIN_XFAIL}; then
         TEST "-fprofile-dir=dir + -fprofile-use"
 
         mkdir data
@@ -64,7 +64,7 @@ SUITE_profiling_gcc() {
         expect_stat cache_miss 3
     fi
     # -------------------------------------------------------------------------
-    if [ -z "${WIN_XFAIL}" ]; then
+    if ${RUN_WIN_XFAIL}; then
         TEST "-fprofile-use + -fprofile-dir=dir"
 
         mkdir data
@@ -92,7 +92,7 @@ SUITE_profiling_gcc() {
         expect_stat cache_miss 3
     fi
     # -------------------------------------------------------------------------
-    if [ -z "${WIN_XFAIL}" ]; then
+    if ${RUN_WIN_XFAIL}; then
         TEST "-fprofile-dir=path1 + -fprofile-use=path2"
 
         mkdir data

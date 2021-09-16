@@ -173,11 +173,18 @@ expect_stat() {
     local line
     local value=""
 
+    if $HOST_OS_WINDOWS ; then 
+        sed_filter="'s/\r//g'"
+    else
+        sed_filter="'s///g'"
+    fi
+    
     while read -r key value; do
         if [[ $key == $stat ]]; then
             break
         fi
-    done < <($CCACHE --print-stats | sed -e 's/\r//g' )
+    done < <($CCACHE --print-stats | sed -e $sed_filter )
+    
 
     if [ "$expected_value" != "$value" ]; then
         test_failed_internal "Expected $stat to be $expected_value, actual $value"

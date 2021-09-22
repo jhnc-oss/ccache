@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include "Path.hpp"
 #include "Args.hpp"
 
 #include <string>
@@ -35,19 +36,19 @@ struct ArgsInfo
   bool expect_output_obj = true;
 
   // The output file being compiled to.
-  std::string output_obj;
+  Path output_obj;
 
   // The path to the dependency file (implicit or specified with -MF).
-  std::string output_dep;
+  Path output_dep;
 
   // The path to the stack usage (implicit when using -fstack-usage).
-  std::string output_su;
+  Path output_su;
 
   // Diagnostic generation information (Clang). Contains pathname if not empty.
-  std::string output_dia;
+  Path output_dia;
 
   // Split dwarf information (GCC 4.8 and up). Contains pathname if not empty.
-  std::string output_dwo;
+  Path output_dwo;
 
   // Language to use for the compilation target (see language.c).
   std::string actual_language;
@@ -90,7 +91,7 @@ struct ArgsInfo
   bool profile_arcs = false;
 
   // Name of the custom profile directory or file.
-  std::string profile_path;
+  Path profile_path;
 
   // Profile generation / usage information.
   bool profile_use = false;

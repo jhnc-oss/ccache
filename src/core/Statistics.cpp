@@ -200,10 +200,10 @@ Statistics::format_config_header(const Config& config)
 {
   std::string result;
 
-  result += FMT("{:36}{}\n", "cache directory", config.cache_dir());
-  result += FMT("{:36}{}\n", "primary config", config.primary_config_path());
+  result += FMT("{:36}{}\n", "cache directory", config.cache_dir().c_str());
+  result += FMT("{:36}{}\n", "primary config", config.primary_config_path().c_str());
   result += FMT(
-    "{:36}{}\n", "secondary config (readonly)", config.secondary_config_path());
+    "{:36}{}\n", "secondary config (readonly)", config.secondary_config_path().c_str());
 
   return result;
 }

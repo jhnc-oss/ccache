@@ -137,7 +137,7 @@ detect_pch(Context& ctx,
   if (!pch_file.empty()) {
     if (!ctx.included_pch_file.empty()) {
       LOG("Multiple precompiled headers used: {} and {}",
-          ctx.included_pch_file,
+          std::string(ctx.included_pch_file),
           pch_file);
       return false;
     }
@@ -207,7 +207,7 @@ process_profiling_option(Context& ctx, const std::string& arg)
 
   if (!new_profile_path.empty()) {
     ctx.args_info.profile_path = new_profile_path;
-    LOG("Set profile directory to {}", ctx.args_info.profile_path);
+    LOG("Set profile directory to {}", nonstd::string_view(ctx.args_info.profile_path));
   }
 
   if (ctx.args_info.profile_generate && ctx.args_info.profile_use) {
@@ -540,7 +540,7 @@ process_arg(Context& ctx,
       state.dep_args.push_back("-MF");
       state.dep_args.push_back(args_info.output_dep);
     } else {
-      state.dep_args.push_back("-MF" + args_info.output_dep);
+      state.dep_args.push_back("-MF" + std::string(args_info.output_dep));
     }
     return nullopt;
   }
@@ -970,7 +970,7 @@ handle_dependency_environment_variables(Context& ctx,
     string_view abspath_obj = dependencies[1];
     std::string relpath_obj = Util::make_relative_path(ctx, abspath_obj);
     // Ensure that the compiler gets a relative path.
-    std::string relpath_both = FMT("{} {}", args_info.output_dep, relpath_obj);
+    std::string relpath_both = FMT("{} {}", nonstd::string_view(args_info.output_dep), relpath_obj);
     if (using_sunpro_dependencies) {
       Util::setenv("SUNPRO_DEPENDENCIES", relpath_both);
     } else {
@@ -1157,7 +1157,7 @@ process_args(Context& ctx)
   if (args_info.output_obj != "/dev/null") {
     auto st = Stat::stat(args_info.output_obj);
     if (st && !st.is_regular()) {
-      LOG("Not a regular file: {}", args_info.output_obj);
+      LOG("Not a regular file: {}", nonstd::string_view(args_info.output_obj));
       return Statistic::bad_output_file;
     }
   }

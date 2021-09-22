@@ -17,6 +17,7 @@
 // Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #pragma once
+#include "Path.hpp"
 
 #include <Stat.hpp>
 #include <util/Tokenizer.hpp>
@@ -185,7 +186,7 @@ const char* get_hostname();
 // `path` (an absolute path). Assumes that both `dir` and `path` are normalized.
 // The algorithm does *not* follow symlinks, so the result may not actually
 // resolve to the same file as `path`.
-std::string get_relative_path(nonstd::string_view dir,
+Path get_relative_path(nonstd::string_view dir,
                               nonstd::string_view path);
 
 // Hard-link `oldpath` to `newpath`. Throws `core::Error` on error.
@@ -270,7 +271,7 @@ bool matches_dir_prefix_or_file(nonstd::string_view dir_prefix_or_file,
 // symlinks, so the result may not actually resolve to `path`.
 //
 // On Windows: Backslashes are replaced with forward slashes.
-std::string normalize_absolute_path(nonstd::string_view path);
+Path normalize_absolute_path(nonstd::string_view path);
 
 // Parse `duration`, an unsigned integer with d (days) or s (seconds) suffix,
 // into seconds. Throws `core::Error` on error.
@@ -352,6 +353,13 @@ std::vector<std::string> split_into_strings(
   nonstd::string_view string,
   const char* separators,
   util::Tokenizer::Mode mode = util::Tokenizer::Mode::skip_empty);
+
+// Same as `split_into_views` ... .
+std::vector<Path> split_into_paths(
+  nonstd::string_view string,
+  const char* separators,
+  util::Tokenizer::Mode mode = util::Tokenizer::Mode::skip_empty);
+
 
 // Returns a copy of string with the specified ANSI CSI sequences removed.
 [[nodiscard]] std::string strip_ansi_csi_seqs(nonstd::string_view string);

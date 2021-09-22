@@ -191,11 +191,12 @@ file_type_to_string(FileType type)
 std::string
 gcno_file_in_mangled_form(const Context& ctx)
 {
-  const auto& output_obj = ctx.args_info.output_obj;
+  const std::string output_obj = ctx.args_info.output_obj;
+  const std::string cwd = ctx.apparent_cwd;
   const std::string abs_output_obj =
     util::is_absolute_path(output_obj)
       ? output_obj
-      : FMT("{}/{}", ctx.apparent_cwd, output_obj);
+      : FMT("{}/{}", cwd, output_obj);
   std::string hashified_obj = abs_output_obj;
   std::replace(hashified_obj.begin(), hashified_obj.end(), '/', '#');
   return Util::change_extension(hashified_obj, ".gcno");

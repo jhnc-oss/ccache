@@ -16,6 +16,8 @@
 // this program; if not, write to the Free Software Foundation, Inc., 51
 // Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include "Path.hpp"
+
 #include "Util.hpp"
 
 #include "Config.hpp"
@@ -687,7 +689,7 @@ get_hostname()
   return hostname;
 }
 
-std::string
+Path
 get_relative_path(string_view dir, string_view path)
 {
   ASSERT(util::is_absolute_path(dir));
@@ -884,7 +886,7 @@ matches_dir_prefix_or_file(string_view dir_prefix_or_file, string_view path)
              || is_dir_separator(dir_prefix_or_file.back()));
 }
 
-std::string
+Path
 normalize_absolute_path(string_view path)
 {
   if (!util::is_absolute_path(path)) {
@@ -1240,6 +1242,14 @@ split_into_strings(string_view string,
                    util::Tokenizer::Mode mode)
 {
   return split_into<std::string>(string, separators, mode);
+}
+
+std::vector<Path>
+split_into_paths(string_view string,
+                   const char* separators,
+                   util::Tokenizer::Mode mode)
+{
+  return split_into<Path>(string, separators, mode);
 }
 
 std::string

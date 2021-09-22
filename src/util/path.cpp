@@ -41,10 +41,10 @@ is_absolute_path(nonstd::string_view path)
   return !path.empty() && path[0] == '/';
 }
 
-std::vector<std::string>
+std::vector<Path>
 split_path_list(nonstd::string_view path_list)
 {
-  return Util::split_into_strings(path_list, k_path_delimiter);
+  return Util::split_into_paths(path_list, k_path_delimiter);
 }
 
 std::string

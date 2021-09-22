@@ -98,7 +98,7 @@ void
 PrimaryStorage::initialize()
 {
   MTR_BEGIN("primary_storage", "clean_internal_tempdir");
-  if (m_config.temporary_dir() == m_config.cache_dir() + "/tmp") {
+  if (m_config.temporary_dir() == std::string(m_config.cache_dir()) + "/tmp") {
     clean_internal_tempdir();
   }
   MTR_END("primary_storage", "clean_internal_tempdir");
@@ -129,7 +129,7 @@ PrimaryStorage::finalize()
 
     const auto bucket = getpid() % 256;
     const auto stats_file =
-      FMT("{}/{:x}/{:x}/stats", m_config.cache_dir(), bucket / 16, bucket % 16);
+      FMT("{}/{:x}/{:x}/stats", m_config.cache_dir().c_str(), bucket / 16, bucket % 16);
     StatsFile(stats_file).update([&](auto& cs) {
       cs.increment(m_result_counter_updates);
     });
@@ -148,7 +148,7 @@ PrimaryStorage::finalize()
   }
 
   const auto subdir =
-    FMT("{}/{:x}", m_config.cache_dir(), m_result_key->bytes()[0] >> 4);
+    FMT("{}/{:x}", m_config.cache_dir().c_str(), m_result_key->bytes()[0] >> 4);
   bool need_cleanup = false;
 
   if (m_config.max_files() != 0
@@ -238,7 +238,7 @@ PrimaryStorage::put(const Digest& key,
   // be done almost anywhere, but we might as well do it near the end as we save
   // the stat call if we exit early.
   util::create_cachedir_tag(
-    FMT("{}/{}", m_config.cache_dir(), key.to_string()[0]));
+    FMT("{}/{}", m_config.cache_dir().c_str(), key.to_string()[0]));
 
   return cache_file.path;
 }
@@ -342,7 +342,7 @@ PrimaryStorage::update_stats_and_maybe_move_cache_file(
   }
 
   const auto stats_file =
-    FMT("{}/{}/stats", m_config.cache_dir(), level_string);
+    FMT("{}/{}/stats", m_config.cache_dir().c_str(), level_string);
   const auto counters =
     StatsFile(stats_file).update([&counter_updates](auto& cs) {
       cs.increment(counter_updates);

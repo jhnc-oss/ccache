@@ -189,7 +189,7 @@ struct ManifestData
   bool
   add_result_entry(
     const Digest& result_key,
-    const std::unordered_map<std::string, Digest>& included_files,
+    const std::unordered_map<Path, Digest>& included_files,
     time_t time_of_compilation,
     bool save_timestamp)
   {
@@ -539,7 +539,7 @@ bool
 put(const Config& config,
     const std::string& path,
     const Digest& result_key,
-    const std::unordered_map<std::string, Digest>& included_files,
+    const std::unordered_map<Path, Digest>& included_files,
 
     time_t time_of_compilation,
     bool save_timestamp)

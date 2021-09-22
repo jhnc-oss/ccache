@@ -21,30 +21,28 @@ EOF
 
 SUITE_basedir() {
     # -------------------------------------------------------------------------
-#    TEST "Enabled CCACHE_BASEDIR"
-#
-#    cd dir1
-#    CCACHE_BASEDIR="`pwd`" $CCACHE_COMPILE -I`pwd`/include -c src/test.c
-#    expect_stat direct_cache_hit 0
-#    expect_stat preprocessed_cache_hit 0
-#    expect_stat cache_miss 1
-#
-#    cd ../dir2
-#    CCACHE_BASEDIR="`pwd`" $CCACHE_COMPILE -I`pwd`/include -c src/test.c
-#    expect_stat direct_cache_hit 1
-#    expect_stat preprocessed_cache_hit 0
-#    expect_stat cache_miss 1
+    TEST "Enabled CCACHE_BASEDIR"
 
-    # -------------------------------------------------------------------------
-    TEST "Disabled (default) CCACHE_BASEDIR"
-    export CCACHE_DEBUG=1
     cd dir1
     CCACHE_BASEDIR="`pwd`" $CCACHE_COMPILE -I`pwd`/include -c src/test.c
     expect_stat direct_cache_hit 0
     expect_stat preprocessed_cache_hit 0
     expect_stat cache_miss 1
 
-    cp * ../dir2
+    cd ../dir2
+    CCACHE_BASEDIR="`pwd`" $CCACHE_COMPILE -I`pwd`/include -c src/test.c
+    expect_stat direct_cache_hit 1
+    expect_stat preprocessed_cache_hit 0
+    expect_stat cache_miss 1
+
+    # -------------------------------------------------------------------------
+    TEST "Disabled (default) CCACHE_BASEDIR"
+
+    cd dir1
+    CCACHE_BASEDIR="`pwd`" $CCACHE_COMPILE -I`pwd`/include -c src/test.c
+    expect_stat direct_cache_hit 0
+    expect_stat preprocessed_cache_hit 0
+    expect_stat cache_miss 1
 
     # CCACHE_BASEDIR="" is the default:
     $CCACHE_COMPILE -I`pwd`/include -c src/test.c

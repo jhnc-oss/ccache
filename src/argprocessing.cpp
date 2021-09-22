@@ -826,7 +826,7 @@ process_arg(Context& ctx,
       return Statistic::bad_compiler_arguments;
     }
 
-    std::string relpath = Util::make_relative_path(ctx, args[i + next]);
+    std::string relpath = Util::make_relative_path(ctx, Path(args[i + next]));
     auto& dest_args =
       compopt_affects_cpp_output(args[i]) ? state.cpp_args : state.common_args;
     dest_args.push_back(args[i]);
@@ -842,12 +842,17 @@ process_arg(Context& ctx,
   // Same as above but options with concatenated argument beginning with a
   // slash.
   if (args[i][0] == '-') {
+
+    // TODO: hier sollte einfach der Prefix weggeschnitten werden. 
+    // std::string option = compopt_prefix(...
+    // Path p = args[i].substr(option.size());
     size_t slash_pos = args[i].find('/');
+
     if (slash_pos != std::string::npos) {
       std::string option = args[i].substr(0, slash_pos);
       if (compopt_takes_concat_arg(option) && compopt_takes_path(option)) {
         auto relpath =
-          Util::make_relative_path(ctx, string_view(args[i]).substr(slash_pos));
+          Util::make_relative_path(ctx, Path(args[i].substr(slash_pos)));
         std::string new_option = option + relpath;
         if (compopt_affects_cpp_output(option)) {
           state.cpp_args.push_back(new_option);

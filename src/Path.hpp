@@ -63,6 +63,27 @@ public:
     return origin;
   }
 
+  std::string foo() const 
+  {
+    std::string s = origin;
+    std::string dir ;
+    if(s[1] == ':'){
+        dir = FMT(R"((/{}|[\\/]?{}:)", s[0],s[0]);
+        s = s.substr(2);
+    }
+    size_t pos = s.find("/");
+    // Repeat till end is reached
+    std::string dir_sep_pattern = R"([\\/]+)";
+    while( pos != std::string::npos)
+    {
+        // Replace this occurrence of Sub String
+        s.replace(pos, 1, dir_sep_pattern);
+        // Get the next occurrence from the current position
+        pos =s.find("/", pos + 6);
+    }
+    return dir + s;
+  }
+
  COMP_OPERATOR(<)
  COMP_OPERATOR(>)
  COMP_OPERATOR(==)

@@ -869,7 +869,7 @@ make_relative_path(const std::string& base_dir,
 }
 
 std::string
-make_relative_path(const Context& ctx, string_view path)
+make_relative_path(const Context& ctx, Path path)
 {
   return make_relative_path(
     ctx.config.base_dir(), ctx.actual_cwd, ctx.apparent_cwd, path);

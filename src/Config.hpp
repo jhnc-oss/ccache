@@ -21,6 +21,7 @@
 #include "NonCopyable.hpp"
 #include "Util.hpp"
 #include "Path.hpp"
+#include "fmtmacros.hpp"
 
 #include <core/Sloppiness.hpp>
 

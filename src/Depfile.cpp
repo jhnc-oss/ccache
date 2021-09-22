@@ -60,6 +60,7 @@ escape_filename(nonstd::string_view filename)
 nonstd::optional<std::string>
 rewrite_paths(const Context& ctx, const std::string& file_content)
 {
+  PRINT_RAW(stderr, ctx.config.base_dir().foo());
   ASSERT(!ctx.config.base_dir().empty());
   ASSERT(ctx.has_absolute_include_headers);
 

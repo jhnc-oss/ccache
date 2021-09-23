@@ -1,9 +1,3 @@
-SUITE_basedir_PROBE() {
-    if ! $RUN_WIN_XFAIL; then
-        echo "basedir is broken on Windows"
-        return
-    fi
-}
 SUITE_basedir_SETUP() {
     unset CCACHE_NODIRECT
 
@@ -229,6 +223,7 @@ EOF
 
     for option in MF "MF " MQ "MQ " MT "MT "; do
         clear_cache
+
         cd dir1
         CCACHE_BASEDIR="`pwd`" $CCACHE_COMPILE -I`pwd`/include -MD -${option}`pwd`/test.d -c src/test.c
         expect_stat direct_cache_hit 0
@@ -249,7 +244,6 @@ EOF
     # absolute paths are rewritten to relative and that the dependency file
     # only contains relative paths.
     TEST "-MF/-MQ/-MT with absolute paths and BASEDIR set to /"
-
     for option in MF "MF " MQ "MQ " MT "MT "; do
         clear_cache
         cd dir1

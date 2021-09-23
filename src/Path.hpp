@@ -17,6 +17,8 @@ class Path
   std::string
   normalize(std::string p)
   {
+
+#ifdef _WIN32
     std::replace(p.begin(), p.end(), '\\', '/');
 
     if (p.length() >= 3 && p[0] == '/') {
@@ -28,7 +30,7 @@ class Path
         p = p.substr(1);
       }
     }
-
+#endif
     // TODO: relativ auflösen 
     // - x/y/z/../../a/b    => /x/a/b 
     // - /x/y/../../a/b     => /a/b 

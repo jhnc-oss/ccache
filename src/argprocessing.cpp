@@ -843,16 +843,11 @@ process_arg(Context& ctx,
   // slash.
   if (args[i][0] == '-') {
 
-    // TODO: hier sollte einfach der Prefix weggeschnitten werden. 
-    // std::string option = compopt_prefix(...
-    // Path p = args[i].substr(option.size());
-    size_t slash_pos = args[i].find('/');
-
-    if (slash_pos != std::string::npos) {
-      std::string option = args[i].substr(0, slash_pos);
+    std::string option =  compopt_prefix(args[i]);
+    if (! option.empty() ) {
       if (compopt_takes_concat_arg(option) && compopt_takes_path(option)) {
-        auto relpath =
-          Util::make_relative_path(ctx, Path(args[i].substr(slash_pos)));
+        auto path = Path(args[i].substr(option.size()));
+        auto relpath = Util::make_relative_path(ctx, path );
         std::string new_option = option + relpath;
         if (compopt_affects_cpp_output(option)) {
           state.cpp_args.push_back(new_option);

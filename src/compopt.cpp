@@ -282,3 +282,16 @@ compopt_prefix_affects_compiler_output(const std::string& option)
   const CompOpt* co = find_prefix(option);
   return co && (co->type & TAKES_CONCAT_ARG) && (co->type & AFFECTS_COMP);
 }
+
+std::string
+compopt_prefix(const std::string& option)
+{
+  // Prefix options have to take concatenated args.
+  const CompOpt* co = find_prefix(option);
+  std::string prefix; 
+  if(co){
+    prefix = co->name;
+  }
+
+  return prefix ;
+}

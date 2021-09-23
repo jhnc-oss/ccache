@@ -49,13 +49,9 @@
 using nonstd::nullopt;
 using nonstd::optional;
 
-#if defined(_MSC_VER)
-#  define DLLIMPORT __declspec(dllimport)
-#else
-#  define DLLIMPORT
-#endif
-
+#ifndef environ
 DLLIMPORT extern char** environ;
+#endif
 
 namespace {
 
@@ -999,7 +995,10 @@ Config::set_item(const std::string& key,
     break;
   }
 
-  m_origins.emplace(key, origin);
+  auto result = m_origins.emplace(key, origin);
+  if (!result.second) {
+    result.first->second = origin;
+  }
 }
 
 void

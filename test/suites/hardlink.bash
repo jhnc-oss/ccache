@@ -13,7 +13,7 @@ SUITE_hardlink() {
 
     generate_code 1 test1.c
 
-    $REAL_COMPILER -c -o reference_test1.o test1.c
+    $COMPILER -c -o reference_test1.o test1.c
 
     CCACHE_HARDLINK=1 $CCACHE_COMPILE -c test1.c
     expect_stat preprocessed_cache_hit 0
@@ -52,18 +52,18 @@ SUITE_hardlink() {
     if $RUN_WIN_XFAIL; then
         TEST "Overwrite assembler"
 
-        generate_code 1 test1.c
-        $REAL_COMPILER -S -o test1.s test1.c
+    generate_code 1 test1.c
+    $COMPILER -S -o test1.s test1.c
 
-        $REAL_COMPILER -c -o reference_test1.o test1.s
+    $COMPILER -c -o reference_test1.o test1.s
 
         CCACHE_HARDLINK=1 $CCACHE_COMPILE -c test1.s
         expect_stat preprocessed_cache_hit 0
         expect_stat cache_miss 1
         expect_stat files_in_cache 2
 
-        generate_code 2 test1.c
-        $REAL_COMPILER -S -o test1.s test1.c
+    generate_code 2 test1.c
+    $COMPILER -S -o test1.s test1.c
 
         CCACHE_HARDLINK=1 $CCACHE_COMPILE -c test1.s
         expect_stat preprocessed_cache_hit 0
@@ -71,7 +71,7 @@ SUITE_hardlink() {
         expect_stat files_in_cache 4
 
         generate_code 1 test1.c
-        $REAL_COMPILER -S -o test1.s test1.c
+        $COMPILER -S -o test1.s test1.c
 
         CCACHE_HARDLINK=1 $CCACHE_COMPILE -c test1.s
         expect_stat preprocessed_cache_hit 1

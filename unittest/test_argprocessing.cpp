@@ -49,26 +49,6 @@ get_root()
 #endif
 }
 
-std::string
-get_posix_path(const std::string& path)
-{
-#ifndef _WIN32
-  return path;
-#else
-  std::string posix;
-
-  // /-escape volume.
-  if (path[0] >= 'A' && path[0] <= 'Z' && path[1] == ':') {
-    posix = "/" + path;
-  } else {
-    posix = path;
-  }
-  // Convert slashes.
-  std::replace(posix.begin(), posix.end(), '\\', '/');
-  return posix;
-#endif
-}
-
 } // namespace
 
 TEST_SUITE_BEGIN("argprocessing");
@@ -470,10 +450,9 @@ TEST_CASE("isystem_flag_with_concat_arg_should_be_rewritten_if_basedir_is_used")
   Context ctx;
 
   Util::write_file("foo.c", "");
-  ctx.config.set_base_dir("/"); // posix
-  // Windows path doesn't work concatenated.
-  std::string cwd = get_posix_path(ctx.actual_cwd);
-  std::string arg_string = FMT("cc -isystem{}/foo -c foo.c", cwd);
+  ctx.config.set_base_dir(get_root()); 
+  
+  std::string arg_string = FMT("cc -isystem{}/foo -c foo.c", ctx.actual_cwd.c_str());
   ctx.orig_args = Args::from_string(arg_string);
 
   const ProcessArgsResult result = process_args(ctx);
@@ -488,10 +467,9 @@ TEST_CASE("I_flag_with_concat_arg_should_be_rewritten_if_basedir_is_used")
   Context ctx;
 
   Util::write_file("foo.c", "");
-  ctx.config.set_base_dir("/"); // posix
-  // Windows path doesn't work concatenated.
-  std::string cwd = get_posix_path(ctx.actual_cwd);
-  std::string arg_string = FMT("cc -I{}/foo -c foo.c", cwd);
+
+  ctx.config.set_base_dir(get_root()); 
+  std::string arg_string = FMT("cc -I{}/foo -c foo.c", ctx.actual_cwd.c_str());
   ctx.orig_args = Args::from_string(arg_string);
 
   const ProcessArgsResult result = process_args(ctx);

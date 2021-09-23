@@ -220,11 +220,18 @@ EOF
 
     # -------------------------------------------------------------------------
     TEST "-MF/-MQ/-MT with absolute paths"
-
-    for option in MF "MF " MQ "MQ " MT "MT "; do
+    
+    if $HOST_OS_WINDOWS; then 
+        additional_options=
+    else
+        additional_options=(MF MQ MT) 
+    fi
+    for option in "MF " "MQ " "MT " $additional_options; do
         clear_cache
 
         cd dir1
+        echo  CCACHE_BASEDIR="`pwd`" $CCACHE_COMPILE -I`pwd`/include -MD -${option}`pwd`/test.d -c src/test.c
+        
         CCACHE_BASEDIR="`pwd`" $CCACHE_COMPILE -I`pwd`/include -MD -${option}`pwd`/test.d -c src/test.c
         expect_stat direct_cache_hit 0
         expect_stat preprocessed_cache_hit 0
@@ -238,13 +245,18 @@ EOF
         expect_stat cache_miss 1
         cd ..
     done
-
     # -------------------------------------------------------------------------
     # When BASEDIR is set to /, check that -MF, -MQ and -MT arguments with
     # absolute paths are rewritten to relative and that the dependency file
     # only contains relative paths.
     TEST "-MF/-MQ/-MT with absolute paths and BASEDIR set to /"
-    for option in MF "MF " MQ "MQ " MT "MT "; do
+    
+    if $HOST_OS_WINDOWS; then 
+        additional_options=
+    else
+        additional_options=(MF MQ MT) 
+    fi
+    for option in "MF " "MQ " "MT " $additional_options; do
         clear_cache
         cd dir1
         CCACHE_BASEDIR="/" $CCACHE_COMPILE -I`pwd`/include -MD -${option}`pwd`/test.d -c src/test.c
@@ -268,50 +280,50 @@ EOF
         expect_stat cache_miss 1
         cd ..
     done
-
     # -------------------------------------------------------------------------
-    TEST "Absolute paths in stderr"
+    if $RUN_WIN_XFAIL; then 
+        TEST "Absolute paths in stderr"
 
-    cat <<EOF >test.c
+        cat <<EOF >test.c
 #include "test.h"
 #warning test.c
 EOF
-    cat <<EOF >test.h
+        cat <<EOF >test.h
 #warning test.h
 EOF
-    backdate test.h
+        backdate test.h
 
-    pwd=$PWD.real
-    $REAL_COMPILER -c $pwd/test.c 2>reference.stderr
+        pwd=$PWD.real
+        $REAL_COMPILER -c $pwd/test.c 2>reference.stderr
 
-    CCACHE_ABSSTDERR=1 CCACHE_BASEDIR="$pwd" $CCACHE_COMPILE -c $pwd/test.c 2>ccache.stderr
-    expect_stat direct_cache_hit 0
-    expect_stat preprocessed_cache_hit 0
-    expect_stat cache_miss 1
-    expect_equal_content reference.stderr ccache.stderr
-
-    CCACHE_ABSSTDERR=1 CCACHE_BASEDIR="$pwd" $CCACHE_COMPILE -c $pwd/test.c 2>ccache.stderr
-    expect_stat direct_cache_hit 1
-    expect_stat preprocessed_cache_hit 0
-    expect_stat cache_miss 1
-    expect_equal_content reference.stderr ccache.stderr
-
-    if $REAL_COMPILER -fdiagnostics-color=always -c test.c 2>/dev/null; then
-        $REAL_COMPILER -fdiagnostics-color=always -c $pwd/test.c 2>reference.stderr
-
-        CCACHE_ABSSTDERR=1 CCACHE_BASEDIR="$pwd" $CCACHE_COMPILE -fdiagnostics-color=always -c $pwd/test.c 2>ccache.stderr
-        expect_stat direct_cache_hit 2
+        CCACHE_ABSSTDERR=1 CCACHE_BASEDIR="$pwd" $CCACHE_COMPILE -c $pwd/test.c 2>ccache.stderr
+        expect_stat direct_cache_hit 0
         expect_stat preprocessed_cache_hit 0
         expect_stat cache_miss 1
         expect_equal_content reference.stderr ccache.stderr
 
-        CCACHE_ABSSTDERR=1 CCACHE_BASEDIR="$pwd" $CCACHE_COMPILE -fdiagnostics-color=always -c $pwd/test.c 2>ccache.stderr
-        expect_stat direct_cache_hit 3
+        CCACHE_ABSSTDERR=1 CCACHE_BASEDIR="$pwd" $CCACHE_COMPILE -c $pwd/test.c 2>ccache.stderr
+        expect_stat direct_cache_hit 1
         expect_stat preprocessed_cache_hit 0
         expect_stat cache_miss 1
         expect_equal_content reference.stderr ccache.stderr
+
+        if $REAL_COMPILER -fdiagnostics-color=always -c test.c 2>/dev/null; then
+            $REAL_COMPILER -fdiagnostics-color=always -c $pwd/test.c 2>reference.stderr
+
+            CCACHE_ABSSTDERR=1 CCACHE_BASEDIR="$pwd" $CCACHE_COMPILE -fdiagnostics-color=always -c $pwd/test.c 2>ccache.stderr
+            expect_stat direct_cache_hit 2
+            expect_stat preprocessed_cache_hit 0
+            expect_stat cache_miss 1
+            expect_equal_content reference.stderr ccache.stderr
+
+            CCACHE_ABSSTDERR=1 CCACHE_BASEDIR="$pwd" $CCACHE_COMPILE -fdiagnostics-color=always -c $pwd/test.c 2>ccache.stderr
+            expect_stat direct_cache_hit 3
+            expect_stat preprocessed_cache_hit 0
+            expect_stat cache_miss 1
+            expect_equal_content reference.stderr ccache.stderr
+        fi
     fi
-
     # -------------------------------------------------------------------------
     TEST "Relative PWD"
 

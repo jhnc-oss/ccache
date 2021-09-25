@@ -544,13 +544,13 @@ Config::secondary_config_path() const
 void
 Config::set_primary_config_path(std::string path)
 {
-  m_primary_config_path = std::move(path);
+  m_primary_config_path = path;
 }
 
 void
 Config::set_secondary_config_path(std::string path)
 {
-  m_secondary_config_path = std::move(path);
+  m_secondary_config_path = path;
 }
 
 bool

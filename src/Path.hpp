@@ -18,7 +18,7 @@ class Path
 {
   std::string origin;
 
-  std::string
+  static std::string
   normalize(std::string p)
   {
 #ifdef _WIN32
@@ -76,14 +76,14 @@ public:
       dir = FMT(R"((/{}|[\\/]?{}:)", s[0], s[0]);
       s = s.substr(2);
     }
-    size_t pos = s.find("/");
+    size_t pos = s.find('/');
     // Repeat till end is reached
     std::string dir_sep_pattern = R"([\\/]+)";
     while (pos != std::string::npos) {
       // Replace this occurrence of Sub String
       s.replace(pos, 1, dir_sep_pattern);
       // Get the next occurrence from the current position
-      pos = s.find("/", pos + 6);
+      pos = s.find('/', pos + 6);
     }
     return dir + s;
   }

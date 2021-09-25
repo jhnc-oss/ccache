@@ -1315,7 +1315,7 @@ hash_common_info(const Context& ctx,
   }
 
   if (!ctx.config.extra_files_to_hash().empty()) {
-    for (const std::string& path :
+    for (std::string path :
          util::split_path_list(ctx.config.extra_files_to_hash())) {
       LOG("Hashing extra file {}", path);
       hash.hash_delimiter("extrafile");

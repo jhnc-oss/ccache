@@ -16,14 +16,13 @@
 // this program; if not, write to the Free Software Foundation, Inc., 51
 // Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include "Path.hpp"
-
 #include "Util.hpp"
 
 #include "Config.hpp"
 #include "Context.hpp"
 #include "Fd.hpp"
 #include "Logging.hpp"
+#include "Path.hpp"
 #include "TemporaryFile.hpp"
 #include "Win32Util.hpp"
 #include "fmtmacros.hpp"
@@ -1246,8 +1245,8 @@ split_into_strings(string_view string,
 
 std::vector<Path>
 split_into_paths(string_view string,
-                   const char* separators,
-                   util::Tokenizer::Mode mode)
+                 const char* separators,
+                 util::Tokenizer::Mode mode)
 {
   return split_into<Path>(string, separators, mode);
 }

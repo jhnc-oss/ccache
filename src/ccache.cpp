@@ -631,8 +631,9 @@ result_key_from_depfile(Context& ctx, Hash& hash)
   try {
     file_content = Util::read_file(ctx.args_info.output_dep);
   } catch (const core::Error& e) {
-    LOG(
-      "Cannot open dependency file {}: {}", nonstd::string_view(ctx.args_info.output_dep), e.what());
+    LOG("Cannot open dependency file {}: {}",
+        nonstd::string_view(ctx.args_info.output_dep),
+        e.what());
     return nullopt;
   }
 
@@ -886,7 +887,9 @@ to_cache(Context& ctx,
     // nonexistent .dwo files.
     if (unlink(ctx.args_info.output_dwo.c_str()) != 0 && errno != ENOENT
         && errno != ESTALE) {
-      LOG("Failed to unlink {}: {}", nonstd::string_view(ctx.args_info.output_dwo), strerror(errno));
+      LOG("Failed to unlink {}: {}",
+          nonstd::string_view(ctx.args_info.output_dwo),
+          strerror(errno));
       return nonstd::make_unexpected(Statistic::bad_output_file);
     }
   }
@@ -894,11 +897,13 @@ to_cache(Context& ctx,
   LOG_RAW("Running real compiler");
   MTR_BEGIN("execute", "compiler");
 
-  TemporaryFile tmp_stdout(FMT("{}/tmp.stdout", ctx.config.temporary_dir().c_str()));
+  TemporaryFile tmp_stdout(
+    FMT("{}/tmp.stdout", ctx.config.temporary_dir().c_str()));
   ctx.register_pending_tmp_file(tmp_stdout.path);
   std::string tmp_stdout_path = tmp_stdout.path;
 
-  TemporaryFile tmp_stderr(FMT("{}/tmp.stderr", ctx.config.temporary_dir().c_str()));
+  TemporaryFile tmp_stderr(
+    FMT("{}/tmp.stderr", ctx.config.temporary_dir().c_str()));
   ctx.register_pending_tmp_file(tmp_stderr.path);
   std::string tmp_stderr_path = tmp_stderr.path;
 
@@ -1602,7 +1607,9 @@ calculate_result_and_manifest_key(Context& ctx,
     const std::string profile_path =
       util::is_absolute_path(ctx.args_info.profile_path)
         ? std::string(ctx.args_info.profile_path)
-        : FMT("{}/{}", nonstd::string_view(ctx.apparent_cwd), nonstd::string_view(ctx.args_info.profile_path));
+        : FMT("{}/{}",
+              nonstd::string_view(ctx.apparent_cwd),
+              nonstd::string_view(ctx.args_info.profile_path));
     LOG("Adding profile directory {} to our hash", profile_path);
     hash.hash_delimiter("-fprofile-dir");
     hash.hash(profile_path);
@@ -2002,7 +2009,8 @@ do_cache_compilation(Context& ctx, const char* const* argv)
   LOG("Hostname: {}", Util::get_hostname());
   LOG("Working directory: {}", nonstd::string_view(ctx.actual_cwd));
   if (ctx.apparent_cwd != ctx.actual_cwd) {
-    LOG("Apparent working directory: {}", nonstd::string_view(ctx.apparent_cwd));
+    LOG("Apparent working directory: {}",
+        nonstd::string_view(ctx.apparent_cwd));
   }
 
   LOG("Compiler type: {}", compiler_type_to_string(ctx.config.compiler_type()));

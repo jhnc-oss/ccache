@@ -18,9 +18,9 @@
 
 #pragma once
 
-#include <third_party/nonstd/string_view.hpp>
+#include <Path.hpp>
 
-#include<Path.hpp>
+#include <third_party/nonstd/string_view.hpp>
 
 #include <string>
 #include <vector>

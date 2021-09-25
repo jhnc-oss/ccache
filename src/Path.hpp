@@ -2,13 +2,17 @@
 #pragma once
 
 #include "fmtmacros.hpp"
+
 #include "third_party/nonstd/string_view.hpp"
 
 #include <regex>
 #include <string>
 
-
-#define COMP_OPERATOR(OP) bool operator OP (const std::string& rhs) const { return origin OP rhs;}
+#define COMP_OPERATOR(OP)                                                      \
+  bool operator OP(const std::string& rhs) const                               \
+  {                                                                            \
+    return origin OP rhs;                                                      \
+  }
 
 class Path
 {
@@ -17,7 +21,6 @@ class Path
   std::string
   normalize(std::string p)
   {
-
 #ifdef _WIN32
     std::replace(p.begin(), p.end(), '\\', '/');
 
@@ -31,15 +34,14 @@ class Path
       }
     }
 #endif
-    // TODO: relativ auflösen 
-    // - x/y/z/../../a/b    => /x/a/b 
-    // - /x/y/../../a/b     => /a/b 
-    // - /x/y/../../../a/b  => /a/b 
-    // - c:/x/../../../a/b  => c:/a/b 
-    // - /x/y/./z           => /x/y/z 
+    // TODO: resolve relative paths
+    // - x/y/z/../../a/b    => /x/a/b
+    // - /x/y/../../a/b     => /a/b
+    // - /x/y/../../../a/b  => /a/b
+    // - c:/x/../../../a/b  => c:/a/b
+    // - /x/y/./z           => /x/y/z
 
-
-    return p ; 
+    return p;
   }
 
 public:
@@ -49,75 +51,77 @@ public:
   Path(nonstd::sv_lite::string_view s) : origin(normalize(std::string(s)))
   {
   }
-  Path(const Path& ) = default; 
-  Path() = default; 
+  Path(const Path&) = default;
+  Path() = default;
 
-  Path& operator=(const Path& ) =  default; 
-  Path& operator=( Path&& ) =  default; 
+  Path& operator=(const Path&) = default;
+  Path& operator=(Path&&) = default;
 
-  operator std::string() const 
+  operator std::string() const
   {
     return origin;
   }
 
-  operator nonstd::sv_lite::string_view() const 
+  operator nonstd::sv_lite::string_view() const
   {
     return origin;
   }
 
-  std::string foo() const 
+  std::string
+  foo() const
   {
     std::string s = origin;
-    std::string dir ;
-    if(s[1] == ':'){
-        dir = FMT(R"((/{}|[\\/]?{}:)", s[0],s[0]);
-        s = s.substr(2);
+    std::string dir;
+    if (s[1] == ':') {
+      dir = FMT(R"((/{}|[\\/]?{}:)", s[0], s[0]);
+      s = s.substr(2);
     }
     size_t pos = s.find("/");
     // Repeat till end is reached
     std::string dir_sep_pattern = R"([\\/]+)";
-    while( pos != std::string::npos)
-    {
-        // Replace this occurrence of Sub String
-        s.replace(pos, 1, dir_sep_pattern);
-        // Get the next occurrence from the current position
-        pos =s.find("/", pos + 6);
+    while (pos != std::string::npos) {
+      // Replace this occurrence of Sub String
+      s.replace(pos, 1, dir_sep_pattern);
+      // Get the next occurrence from the current position
+      pos = s.find("/", pos + 6);
     }
     return dir + s;
   }
 
- COMP_OPERATOR(<)
- COMP_OPERATOR(>)
- COMP_OPERATOR(==)
- COMP_OPERATOR(<=)
- COMP_OPERATOR(>=)
- COMP_OPERATOR(!=)
+  COMP_OPERATOR(<)
+  COMP_OPERATOR(>)
+  COMP_OPERATOR(==)
+  COMP_OPERATOR(<=)
+  COMP_OPERATOR(>=)
+  COMP_OPERATOR(!=)
 
- bool empty() const {
-     return origin.empty();
- }
+  bool
+  empty() const
+  {
+    return origin.empty();
+  }
 
- const char* c_str() const {
-     return origin.c_str();
- }
+  const char*
+  c_str() const
+  {
+    return origin.c_str();
+  }
 
- template<typename... ARGS>
- std::string substr(ARGS... args) const {
-     return origin.substr(args...);
- }
-
-
+  template<typename... ARGS>
+  std::string
+  substr(ARGS... args) const
+  {
+    return origin.substr(args...);
+  }
 };
 
-
-
-namespace std
+namespace std {
+template<> struct hash<Path>
 {
-    template<> struct hash<Path>
-    {
-        std::size_t operator()(Path const& p) const noexcept
-        {
-            return std::hash<std::string>{}((std::string) p);
-        }
-    };
-}
+  std::size_t
+  operator()(Path const& p) const noexcept
+  {
+    return std::hash<std::string>{}((std::string)p);
+  }
+};
+} // namespace std

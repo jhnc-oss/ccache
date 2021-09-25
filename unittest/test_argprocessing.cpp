@@ -282,8 +282,8 @@ TEST_CASE("sysroot_should_be_rewritten_if_basedir_is_used")
 
   Util::write_file("foo.c", "");
   ctx.config.set_base_dir(get_root());
-  std::string arg_string =
-    FMT("cc --sysroot={}/foo/bar -c foo.c", nonstd::string_view(ctx.actual_cwd));
+  std::string arg_string = FMT("cc --sysroot={}/foo/bar -c foo.c",
+                               nonstd::string_view(ctx.actual_cwd));
   ctx.orig_args = Args::from_string(arg_string);
 
   const ProcessArgsResult result = process_args(ctx);
@@ -300,7 +300,8 @@ TEST_CASE(
 
   Util::write_file("foo.c", "");
   ctx.config.set_base_dir(get_root());
-  std::string arg_string = FMT("cc --sysroot {}/foo -c foo.c", ctx.actual_cwd.c_str());
+  std::string arg_string =
+    FMT("cc --sysroot {}/foo -c foo.c", ctx.actual_cwd.c_str());
   ctx.orig_args = Args::from_string(arg_string);
 
   const ProcessArgsResult result = process_args(ctx);
@@ -435,7 +436,8 @@ TEST_CASE(
 
   Util::write_file("foo.c", "");
   ctx.config.set_base_dir(get_root());
-  std::string arg_string = FMT("cc -isystem {}/foo -c foo.c", ctx.actual_cwd.c_str());
+  std::string arg_string =
+    FMT("cc -isystem {}/foo -c foo.c", ctx.actual_cwd.c_str());
   ctx.orig_args = Args::from_string(arg_string);
 
   const ProcessArgsResult result = process_args(ctx);
@@ -450,9 +452,10 @@ TEST_CASE("isystem_flag_with_concat_arg_should_be_rewritten_if_basedir_is_used")
   Context ctx;
 
   Util::write_file("foo.c", "");
-  ctx.config.set_base_dir(get_root()); 
-  
-  std::string arg_string = FMT("cc -isystem{}/foo -c foo.c", ctx.actual_cwd.c_str());
+  ctx.config.set_base_dir(get_root());
+
+  std::string arg_string =
+    FMT("cc -isystem{}/foo -c foo.c", ctx.actual_cwd.c_str());
   ctx.orig_args = Args::from_string(arg_string);
 
   const ProcessArgsResult result = process_args(ctx);
@@ -468,7 +471,7 @@ TEST_CASE("I_flag_with_concat_arg_should_be_rewritten_if_basedir_is_used")
 
   Util::write_file("foo.c", "");
 
-  ctx.config.set_base_dir(get_root()); 
+  ctx.config.set_base_dir(get_root());
   std::string arg_string = FMT("cc -I{}/foo -c foo.c", ctx.actual_cwd.c_str());
   ctx.orig_args = Args::from_string(arg_string);
 

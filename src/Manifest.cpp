@@ -187,11 +187,10 @@ struct ManifestData
   std::vector<ResultEntry> results;
 
   bool
-  add_result_entry(
-    const Digest& result_key,
-    const std::unordered_map<Path, Digest>& included_files,
-    time_t time_of_compilation,
-    bool save_timestamp)
+  add_result_entry(const Digest& result_key,
+                   const std::unordered_map<Path, Digest>& included_files,
+                   time_t time_of_compilation,
+                   bool save_timestamp)
   {
     std::unordered_map<std::string, uint32_t /*index*/> mf_files;
     for (uint32_t i = 0; i < files.size(); ++i) {

@@ -17,7 +17,6 @@
 // Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #pragma once
-#include "Path.hpp"
 #include "Args.hpp"
 #include "ArgsInfo.hpp"
 #include "Config.hpp"
@@ -25,6 +24,7 @@
 #include "File.hpp"
 #include "MiniTrace.hpp"
 #include "NonCopyable.hpp"
+#include "Path.hpp"
 
 #ifdef INODE_CACHE_SUPPORTED
 #  include "InodeCache.hpp"

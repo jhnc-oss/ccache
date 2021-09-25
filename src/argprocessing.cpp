@@ -207,7 +207,8 @@ process_profiling_option(Context& ctx, const std::string& arg)
 
   if (!new_profile_path.empty()) {
     ctx.args_info.profile_path = new_profile_path;
-    LOG("Set profile directory to {}", nonstd::string_view(ctx.args_info.profile_path));
+    LOG("Set profile directory to {}",
+        nonstd::string_view(ctx.args_info.profile_path));
   }
 
   if (ctx.args_info.profile_generate && ctx.args_info.profile_use) {
@@ -842,12 +843,11 @@ process_arg(Context& ctx,
   // Same as above but options with concatenated argument beginning with a
   // slash.
   if (args[i][0] == '-') {
-
-    std::string option =  compopt_prefix(args[i]);
-    if (! option.empty() ) {
+    std::string option = compopt_prefix(args[i]);
+    if (!option.empty()) {
       if (compopt_takes_concat_arg(option) && compopt_takes_path(option)) {
         auto path = Path(args[i].substr(option.size()));
-        auto relpath = Util::make_relative_path(ctx, path );
+        auto relpath = Util::make_relative_path(ctx, path);
         std::string new_option = option + relpath;
         if (compopt_affects_cpp_output(option)) {
           state.cpp_args.push_back(new_option);
@@ -970,7 +970,8 @@ handle_dependency_environment_variables(Context& ctx,
     string_view abspath_obj = dependencies[1];
     std::string relpath_obj = Util::make_relative_path(ctx, abspath_obj);
     // Ensure that the compiler gets a relative path.
-    std::string relpath_both = FMT("{} {}", nonstd::string_view(args_info.output_dep), relpath_obj);
+    std::string relpath_both =
+      FMT("{} {}", nonstd::string_view(args_info.output_dep), relpath_obj);
     if (using_sunpro_dependencies) {
       Util::setenv("SUNPRO_DEPENDENCIES", relpath_both);
     } else {

@@ -128,8 +128,10 @@ PrimaryStorage::finalize()
     ASSERT(m_result_counter_updates.get(Statistic::files_in_cache) == 0);
 
     const auto bucket = getpid() % 256;
-    const auto stats_file =
-      FMT("{}/{:x}/{:x}/stats", m_config.cache_dir().c_str(), bucket / 16, bucket % 16);
+    const auto stats_file = FMT("{}/{:x}/{:x}/stats",
+                                m_config.cache_dir().c_str(),
+                                bucket / 16,
+                                bucket % 16);
     StatsFile(stats_file).update([&](auto& cs) {
       cs.increment(m_result_counter_updates);
     });

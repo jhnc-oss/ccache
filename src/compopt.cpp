@@ -288,10 +288,10 @@ compopt_prefix(const std::string& option)
 {
   // Prefix options have to take concatenated args.
   const CompOpt* co = find_prefix(option);
-  std::string prefix; 
-  if(co){
+  std::string prefix;
+  if (co) {
     prefix = co->name;
   }
 
-  return prefix ;
+  return prefix;
 }

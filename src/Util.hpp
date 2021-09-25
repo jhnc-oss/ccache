@@ -186,8 +186,7 @@ const char* get_hostname();
 // `path` (an absolute path). Assumes that both `dir` and `path` are normalized.
 // The algorithm does *not* follow symlinks, so the result may not actually
 // resolve to the same file as `path`.
-Path get_relative_path(nonstd::string_view dir,
-                              nonstd::string_view path);
+Path get_relative_path(nonstd::string_view dir, nonstd::string_view path);
 
 // Hard-link `oldpath` to `newpath`. Throws `core::Error` on error.
 void hard_link(const std::string& oldpath, const std::string& newpath);
@@ -359,7 +358,6 @@ std::vector<Path> split_into_paths(
   nonstd::string_view string,
   const char* separators,
   util::Tokenizer::Mode mode = util::Tokenizer::Mode::skip_empty);
-
 
 // Returns a copy of string with the specified ANSI CSI sequences removed.
 [[nodiscard]] std::string strip_ansi_csi_seqs(nonstd::string_view string);

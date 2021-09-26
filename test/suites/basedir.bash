@@ -220,18 +220,18 @@ EOF
 
     # -------------------------------------------------------------------------
     TEST "-MF/-MQ/-MT with absolute paths"
-    
-    if $HOST_OS_WINDOWS; then 
+
+    if $HOST_OS_WINDOWS; then
         additional_options=
     else
-        additional_options=(MF MQ MT) 
+        additional_options=(MF MQ MT)
     fi
     for option in "MF " "MQ " "MT " $additional_options; do
         clear_cache
 
         cd dir1
         echo  CCACHE_BASEDIR="`pwd`" $CCACHE_COMPILE -I`pwd`/include -MD -${option}`pwd`/test.d -c src/test.c
-        
+
         CCACHE_BASEDIR="`pwd`" $CCACHE_COMPILE -I`pwd`/include -MD -${option}`pwd`/test.d -c src/test.c
         expect_stat direct_cache_hit 0
         expect_stat preprocessed_cache_hit 0
@@ -250,16 +250,22 @@ EOF
     # absolute paths are rewritten to relative and that the dependency file
     # only contains relative paths.
     TEST "-MF/-MQ/-MT with absolute paths and BASEDIR set to /"
-    
-    if $HOST_OS_WINDOWS; then 
+
+    if $HOST_OS_WINDOWS; then
         additional_options=
     else
-        additional_options=(MF MQ MT) 
+        additional_options=(MF MQ MT)
     fi
     for option in "MF " "MQ " "MT " $additional_options; do
         clear_cache
         cd dir1
-        CCACHE_BASEDIR="/" $CCACHE_COMPILE -I`pwd`/include -MD -${option}`pwd`/test.d -c src/test.c
+
+        CACHE_DIR="/"
+        if $HOST_OS_WINDOWS; then
+            # Windows uses drives therefore "/" has no meaning, thus default to drive
+            CACHE_DIR=`echo "\`pwd\`" | grep -Eo "^/."`
+        fi
+        CCACHE_BASEDIR=$CACHE_DIR $CCACHE_COMPILE -I`pwd`/include -MD -${option}`pwd`/test.d -c src/test.c
         expect_stat direct_cache_hit 0
         expect_stat preprocessed_cache_hit 0
         expect_stat cache_miss 1
@@ -274,14 +280,14 @@ EOF
         cd ..
 
         cd dir2
-        CCACHE_BASEDIR="/" $CCACHE_COMPILE -I`pwd`/include -MD -${option}`pwd`/test.d -c src/test.c
+        CCACHE_BASEDIR=$CACHE_DIR $CCACHE_COMPILE -I`pwd`/include -MD -${option}`pwd`/test.d -c src/test.c
         expect_stat direct_cache_hit 1
         expect_stat preprocessed_cache_hit 0
         expect_stat cache_miss 1
         cd ..
     done
     # -------------------------------------------------------------------------
-    if $RUN_WIN_XFAIL; then 
+    if $RUN_WIN_XFAIL; then
         TEST "Absolute paths in stderr"
 
         cat <<EOF >test.c

@@ -541,7 +541,7 @@ process_arg(const Context& ctx,
       state.dep_args.push_back("-MF");
       state.dep_args.push_back(args_info.output_dep);
     } else {
-      state.dep_args.push_back("-MF" + args_info.output_dep);
+      state.dep_args.push_back("-MF" + std::string(args_info.output_dep));
     }
     return nullopt;
   }
@@ -830,7 +830,7 @@ process_arg(const Context& ctx,
       return Statistic::bad_compiler_arguments;
     }
 
-    std::string relpath = Util::make_relative_path(ctx, args[i + next]);
+    std::string relpath = Util::make_relative_path(ctx, Path(args[i + next]));
     auto& dest_args =
       compopt_affects_cpp_output(args[i]) ? state.cpp_args : state.common_args;
     dest_args.push_back(args[i]);
@@ -846,12 +846,11 @@ process_arg(const Context& ctx,
   // Same as above but options with concatenated argument beginning with a
   // slash.
   if (args[i][0] == '-') {
-    size_t slash_pos = args[i].find('/');
-    if (slash_pos != std::string::npos) {
-      std::string option = args[i].substr(0, slash_pos);
+    std::string option = compopt_prefix(args[i]);
+    if (!option.empty()) {
       if (compopt_takes_concat_arg(option) && compopt_takes_path(option)) {
-        auto relpath =
-          Util::make_relative_path(ctx, string_view(args[i]).substr(slash_pos));
+        auto path = Path(args[i].substr(option.size()));
+        auto relpath = Util::make_relative_path(ctx, path);
         std::string new_option = option + relpath;
         if (compopt_affects_cpp_output(option)) {
           state.cpp_args.push_back(new_option);
@@ -974,7 +973,8 @@ handle_dependency_environment_variables(Context& ctx,
     string_view abspath_obj = dependencies[1];
     std::string relpath_obj = Util::make_relative_path(ctx, abspath_obj);
     // Ensure that the compiler gets a relative path.
-    std::string relpath_both = FMT("{} {}", args_info.output_dep, relpath_obj);
+    std::string relpath_both =
+      FMT("{} {}", nonstd::string_view(args_info.output_dep), relpath_obj);
     if (using_sunpro_dependencies) {
       Util::setenv("SUNPRO_DEPENDENCIES", relpath_both);
     } else {
@@ -1162,7 +1162,7 @@ process_args(Context& ctx)
   if (args_info.output_obj != "/dev/null") {
     auto st = Stat::stat(args_info.output_obj);
     if (st && !st.is_regular()) {
-      LOG("Not a regular file: {}", args_info.output_obj);
+      LOG("Not a regular file: {}", nonstd::string_view(args_info.output_obj));
       return Statistic::bad_output_file;
     }
   }

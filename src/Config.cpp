@@ -529,13 +529,13 @@ Config::read()
   // in prio order (1. environment, 2. primary config, 3. secondary config).
 }
 
-const std::string&
+const Path&
 Config::primary_config_path() const
 {
   return m_primary_config_path;
 }
 
-const std::string&
+const Path&
 Config::secondary_config_path() const
 {
   return m_secondary_config_path;
@@ -544,13 +544,13 @@ Config::secondary_config_path() const
 void
 Config::set_primary_config_path(std::string path)
 {
-  m_primary_config_path = std::move(path);
+  m_primary_config_path = path;
 }
 
 void
 Config::set_secondary_config_path(std::string path)
 {
-  m_secondary_config_path = std::move(path);
+  m_secondary_config_path = path;
 }
 
 bool

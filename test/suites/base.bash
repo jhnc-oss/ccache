@@ -671,6 +671,7 @@ b"
     expect_stat cache_miss 1
     expect_content prefix.result "a
 b"
+
     # -------------------------------------------------------------------------
     TEST "Files in cache"
 
@@ -1103,6 +1104,7 @@ fi
 
     # -------------------------------------------------------------------------
     TEST "No object file due to bad prefix"
+
     cat <<'EOF' >test_no_obj.c
 int test_no_obj;
 EOF
@@ -1119,6 +1121,7 @@ EOF
     expect_stat cache_miss 0
     expect_stat files_in_cache 0
     expect_stat compiler_produced_no_output 2
+
 
     # -------------------------------------------------------------------------
     TEST "No object file due to -fsyntax-only"
@@ -1143,6 +1146,7 @@ EOF
 
     # -------------------------------------------------------------------------
     TEST "Empty object file"
+
     cat <<'EOF' >test_empty_obj.c
 int test_empty_obj;
 EOF
@@ -1154,6 +1158,7 @@ EOF
     chmod +x empty-object-prefix.sh
     CCACHE_PREFIX=`pwd`/empty-object-prefix.sh $CCACHE_COMPILE -c test_empty_obj.c
     expect_stat compiler_produced_empty_output 1
+
 
     # -------------------------------------------------------------------------
     TEST "Output to /dev/null"

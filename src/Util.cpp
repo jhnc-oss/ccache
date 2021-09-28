@@ -22,6 +22,7 @@
 #include "Context.hpp"
 #include "Fd.hpp"
 #include "Logging.hpp"
+#include "Path.hpp"
 #include "TemporaryFile.hpp"
 #include "Win32Util.hpp"
 #include "fmtmacros.hpp"
@@ -687,7 +688,7 @@ get_hostname()
   return hostname;
 }
 
-std::string
+Path
 get_relative_path(string_view dir, string_view path)
 {
   ASSERT(util::is_absolute_path(dir));
@@ -867,7 +868,7 @@ make_relative_path(const std::string& base_dir,
 }
 
 std::string
-make_relative_path(const Context& ctx, string_view path)
+make_relative_path(const Context& ctx, Path path)
 {
   return make_relative_path(
     ctx.config.base_dir(), ctx.actual_cwd, ctx.apparent_cwd, path);
@@ -884,7 +885,7 @@ matches_dir_prefix_or_file(string_view dir_prefix_or_file, string_view path)
              || is_dir_separator(dir_prefix_or_file.back()));
 }
 
-std::string
+Path
 normalize_absolute_path(string_view path)
 {
   if (!util::is_absolute_path(path)) {
@@ -1240,6 +1241,14 @@ split_into_strings(string_view string,
                    util::Tokenizer::Mode mode)
 {
   return split_into<std::string>(string, separators, mode);
+}
+
+std::vector<Path>
+split_into_paths(string_view string,
+                 const char* separators,
+                 util::Tokenizer::Mode mode)
+{
+  return split_into<Path>(string, separators, mode);
 }
 
 std::string

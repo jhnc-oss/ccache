@@ -462,7 +462,7 @@ InodeCache::drop()
 std::string
 InodeCache::get_file()
 {
-  return FMT("{}/inode-cache.v{}", m_config.temporary_dir(), k_version);
+  return FMT("{}/inode-cache.v{}", m_config.temporary_dir().c_str(), k_version);
 }
 
 int64_t

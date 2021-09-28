@@ -1,9 +1,3 @@
-SUITE_basedir_PROBE() {
-    if ! $RUN_WIN_XFAIL; then  
-        echo "CCACHE_BASEDIR is broken on windows."
-    fi
-}    
-
 SUITE_basedir_SETUP() {
     unset CCACHE_NODIRECT
 

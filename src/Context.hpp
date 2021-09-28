@@ -17,7 +17,6 @@
 // Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #pragma once
-
 #include "Args.hpp"
 #include "ArgsInfo.hpp"
 #include "Config.hpp"
@@ -25,6 +24,7 @@
 #include "File.hpp"
 #include "MiniTrace.hpp"
 #include "NonCopyable.hpp"
+#include "Path.hpp"
 
 #ifdef INODE_CACHE_SUPPORTED
 #  include "InodeCache.hpp"
@@ -56,10 +56,10 @@ public:
   Config config;
 
   // Current working directory as returned by getcwd(3).
-  std::string actual_cwd;
+  Path actual_cwd;
 
   // Current working directory according to $PWD (falling back to getcwd(3)).
-  std::string apparent_cwd;
+  Path apparent_cwd;
 
   // The original argument list.
   Args orig_args;
@@ -69,7 +69,7 @@ public:
   time_t time_of_compilation = 0;
 
   // Files included by the preprocessor and their hashes.
-  std::unordered_map<std::string, Digest> included_files;
+  std::unordered_map<Path, Digest> included_files;
 
   // Uses absolute path for some include files.
   bool has_absolute_include_headers = false;
@@ -78,16 +78,16 @@ public:
   bool diagnostics_color_failed = false;
 
   // The name of the temporary preprocessed file.
-  std::string i_tmpfile;
+  Path i_tmpfile;
 
   // The name of the cpp stderr file.
-  std::string cpp_stderr;
+  Path cpp_stderr;
 
   // The .gch/.pch/.pth file used for compilation.
-  std::string included_pch_file;
+  Path included_pch_file;
 
   // Headers (or directories with headers) to ignore in manifest mode.
-  std::vector<std::string> ignore_header_paths;
+  std::vector<Path> ignore_header_paths;
 
   // Storage (fronting primary and secondary storage backends).
   storage::Storage storage;

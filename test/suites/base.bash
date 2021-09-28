@@ -804,7 +804,7 @@ if ! $HOST_OS_WINDOWS; then
         expect_stat preprocessed_cache_hit 2
         expect_stat cache_miss 2
     fi
-    fi
+fi
     # -------------------------------------------------------------------------
 if ! ( $HOST_OS_WINDOWS && $COMPILER_TYPE_CLANG ) && [ -n "$COMPILER_ARGS" ] ; then
     TEST "CCACHE_COMPILER"

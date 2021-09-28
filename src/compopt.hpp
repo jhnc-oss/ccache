@@ -31,3 +31,4 @@ bool compopt_takes_arg(const std::string& option);
 bool compopt_takes_concat_arg(const std::string& option);
 bool compopt_prefix_affects_cpp_output(const std::string& option);
 bool compopt_prefix_affects_compiler_output(const std::string& option);
+std::string compopt_prefix(const std::string& option);

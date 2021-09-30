@@ -634,29 +634,28 @@ fi
 
     # -------------------------------------------------------------------------
     TEST "CCACHE_PREFIX"
-if $RUN_WIN_XFAIL;then
-    cat <<'EOF' >prefix-a
+    cat <<'EOF' >prefix-a.sh
 #!/bin/sh
 echo a >prefix.result
 exec "$@"
 EOF
-    cat <<'EOF' >prefix-b
+    cat <<'EOF' >prefix-b.sh
 #!/bin/sh
 echo b >>prefix.result
 exec "$@"
 EOF
-    chmod +x prefix-a prefix-b
+    chmod +x prefix-a.sh prefix-b.sh
     cat <<'EOF' >file.c
 int foo;
 EOF
-    PATH=.:$PATH CCACHE_PREFIX="prefix-a prefix-b" $CCACHE_COMPILE -c file.c
+    PATH=.:$PATH CCACHE_PREFIX="prefix-a.sh prefix-b.sh" $CCACHE_COMPILE -c file.c
     expect_stat direct_cache_hit 0
     expect_stat preprocessed_cache_hit 0
     expect_stat cache_miss 1
     expect_content prefix.result "a
 b"
 
-    PATH=.:$PATH CCACHE_PREFIX="prefix-a prefix-b" $CCACHE_COMPILE -c file.c
+    PATH=.:$PATH CCACHE_PREFIX="prefix-a.sh prefix-b.sh" $CCACHE_COMPILE -c file.c
     expect_stat direct_cache_hit 0
     expect_stat preprocessed_cache_hit 1
     expect_stat cache_miss 1
@@ -664,13 +663,12 @@ b"
 b"
 
     rm -f prefix.result
-    PATH=.:$PATH CCACHE_PREFIX_CPP="prefix-a prefix-b" $CCACHE_COMPILE -c file.c
+    PATH=.:$PATH CCACHE_PREFIX_CPP="prefix-a.sh prefix-b.sh" $CCACHE_COMPILE -c file.c
     expect_stat direct_cache_hit 0
     expect_stat preprocessed_cache_hit 2
     expect_stat cache_miss 1
     expect_content prefix.result "a
 b"
-fi
     # -------------------------------------------------------------------------
     TEST "Files in cache"
 
@@ -740,7 +738,7 @@ fi
     expect_stat unsupported_source_language 1
 
     # -------------------------------------------------------------------------
-if $RUN_WIN_XFAIL; then
+if ! $HOST_OS_WINDOWS; then
     TEST "-x c -c /dev/null"
 
     $CCACHE_COMPILE -x c -c /dev/null -o null.o 2>/dev/null

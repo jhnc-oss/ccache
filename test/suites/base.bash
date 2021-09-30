@@ -576,13 +576,11 @@ fi
     fi
     
     # -------------------------------------------------------------------------
-if $RUN_WIN_XFAIL; then    
     TEST "CCACHE_NOHASHDIR"
 
     mkdir dir1 dir2
     cp test1.c dir1
     cp test1.c dir2
-    export CCACHE_DEBUG=1
 
     cd dir1
     CCACHE_NOHASHDIR=1 $CCACHE_COMPILE -c test1.c -g
@@ -596,7 +594,6 @@ if $RUN_WIN_XFAIL; then
     CCACHE_NOHASHDIR=1 $CCACHE_COMPILE -c test1.c -g
     expect_stat preprocessed_cache_hit 2
     expect_stat cache_miss 1
-fi
 
     # -------------------------------------------------------------------------
     TEST "CCACHE_EXTRAFILES"

@@ -170,7 +170,7 @@ prepare_debug_path(const std::string& debug_dir,
 {
   auto prefix = debug_dir.empty()
                   ? output_obj
-                  : debug_dir + util::to_absolute_path(output_obj);
+                  : debug_dir + util::to_absolute_path(output_obj).str();
 #ifdef _WIN32
   prefix.erase(std::remove(prefix.begin(), prefix.end(), ':'), prefix.end());
 #endif
@@ -281,7 +281,7 @@ do_remember_include_file(Context& ctx,
     return true;
   }
 
-  if (path == ctx.args_info.input_file) {
+  if (path == ctx.args_info.input_file.str()) {
     // Don't remember the input file.
     return true;
   }
@@ -549,21 +549,12 @@ process_preprocessed_file(Context& ctx,
       if (!ctx.has_absolute_include_headers) {
         ctx.has_absolute_include_headers = util::is_absolute_path(inc_path);
       }
+
       inc_path = Util::make_relative_path(ctx, inc_path);
 
       bool should_hash_inc_path = true;
-      if (!ctx.config.hash_dir()) {
-        if (util::starts_with(inc_path, ctx.apparent_cwd)
-            && util::ends_with(inc_path, "//")) {
-          // When compiling with -g or similar, GCC adds the absolute path to
-          // CWD like this:
-          //
-          //   # 1 "CWD//"
-          //
-          // If the user has opted out of including the CWD in the hash, don't
-          // hash it. See also how debug_prefix_map is handled.
-          should_hash_inc_path = false;
-        }
+      if (!ctx.config.hash_dir() && (Path(inc_path) == ctx.apparent_cwd)) {
+        should_hash_inc_path = false;
       }
       if (should_hash_inc_path) {
         hash.hash(inc_path);
@@ -632,9 +623,8 @@ result_key_from_depfile(Context& ctx, Hash& hash)
   try {
     file_content = Util::read_file(ctx.args_info.output_dep);
   } catch (const core::Error& e) {
-    LOG("Cannot open dependency file {}: {}",
-        nonstd::string_view(ctx.args_info.output_dep),
-        e.what());
+    LOG(
+      "Cannot open dependency file {}: {}", ctx.args_info.output_dep, e.what());
     return nullopt;
   }
 
@@ -891,9 +881,7 @@ to_cache(Context& ctx,
     // nonexistent .dwo files.
     if (unlink(ctx.args_info.output_dwo.c_str()) != 0 && errno != ENOENT
         && errno != ESTALE) {
-      LOG("Failed to unlink {}: {}",
-          nonstd::string_view(ctx.args_info.output_dwo),
-          strerror(errno));
+      LOG("Failed to unlink {}: {}", ctx.args_info.output_dwo, strerror(errno));
       return nonstd::make_unexpected(Statistic::bad_output_file);
     }
   }
@@ -1264,7 +1252,7 @@ hash_common_info(const Context& ctx,
         LOG("Relocating debuginfo from {} to {} (CWD: {})",
             old_path,
             new_path,
-            nonstd::string_view(ctx.apparent_cwd));
+            ctx.apparent_cwd);
         if (util::starts_with(ctx.apparent_cwd, old_path)) {
           dir_to_hash = new_path + ctx.apparent_cwd.substr(old_path.size());
         }
@@ -1611,9 +1599,7 @@ calculate_result_and_manifest_key(Context& ctx,
     const std::string profile_path =
       util::is_absolute_path(ctx.args_info.profile_path)
         ? std::string(ctx.args_info.profile_path)
-        : FMT("{}/{}",
-              nonstd::string_view(ctx.apparent_cwd),
-              nonstd::string_view(ctx.args_info.profile_path));
+        : FMT("{}/{}", ctx.apparent_cwd, ctx.args_info.profile_path);
     LOG("Adding profile directory {} to our hash", profile_path);
     hash.hash_delimiter("-fprofile-dir");
     hash.hash(profile_path);
@@ -2011,10 +1997,9 @@ do_cache_compilation(Context& ctx, const char* const* argv)
 
   LOG("Command line: {}", Util::format_argv_for_logging(argv));
   LOG("Hostname: {}", Util::get_hostname());
-  LOG("Working directory: {}", nonstd::string_view(ctx.actual_cwd));
+  LOG("Working directory: {}", ctx.actual_cwd);
   if (ctx.apparent_cwd != ctx.actual_cwd) {
-    LOG("Apparent working directory: {}",
-        nonstd::string_view(ctx.apparent_cwd));
+    LOG("Apparent working directory: {}", ctx.apparent_cwd);
   }
 
   LOG("Compiler type: {}", compiler_type_to_string(ctx.config.compiler_type()));
@@ -2039,19 +2024,19 @@ do_cache_compilation(Context& ctx, const char* const* argv)
 
   LOG("Source file: {}", ctx.args_info.input_file);
   if (ctx.args_info.generating_dependencies) {
-    LOG("Dependency file: {}", nonstd::string_view(ctx.args_info.output_dep));
+    LOG("Dependency file: {}", ctx.args_info.output_dep);
   }
   if (ctx.args_info.generating_coverage) {
     LOG_RAW("Coverage file is being generated");
   }
   if (ctx.args_info.generating_stackusage) {
-    LOG("Stack usage file: {}", nonstd::string_view(ctx.args_info.output_su));
+    LOG("Stack usage file: {}", ctx.args_info.output_su);
   }
   if (ctx.args_info.generating_diagnostics) {
-    LOG("Diagnostics file: {}", nonstd::string_view(ctx.args_info.output_dia));
+    LOG("Diagnostics file: {}", ctx.args_info.output_dia);
   }
   if (!ctx.args_info.output_dwo.empty()) {
-    LOG("Split dwarf file: {}", nonstd::string_view(ctx.args_info.output_dwo));
+    LOG("Split dwarf file: {}", ctx.args_info.output_dwo);
   }
 
   LOG("Object file: {}", ctx.args_info.output_obj.c_str());

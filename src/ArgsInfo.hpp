@@ -28,7 +28,7 @@
 struct ArgsInfo
 {
   // The source file.
-  std::string input_file;
+  Path input_file;
 
   // In normal compiler operation an output file is created if there is no
   // compiler error. However certain flags like -fsyntax-only change this

@@ -40,7 +40,7 @@ bool is_full_path(nonstd::string_view path);
 std::vector<Path> split_path_list(nonstd::string_view path_list);
 
 // Make `path` an absolute path.
-std::string to_absolute_path(nonstd::string_view path);
+Path to_absolute_path(nonstd::string_view path);
 
 // --- Inline implementations ---
 

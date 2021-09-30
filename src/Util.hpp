@@ -163,13 +163,13 @@ std::string format_parsable_size_with_suffix(uint64_t size);
 
 // Return current working directory (CWD) as returned from getcwd(3) (i.e.,
 // normalized path without symlink parts). Returns the empty string on error.
-std::string get_actual_cwd();
+Path get_actual_cwd();
 
 // Return current working directory (CWD) by reading the environment variable
 // PWD (thus keeping any symlink parts in the path and potentially ".." or "//"
 // parts). If PWD does not resolve to the same i-node as `actual_cwd` then
 // `actual_cwd` is returned instead.
-std::string get_apparent_cwd(const std::string& actual_cwd);
+Path get_apparent_cwd(const std::string& actual_cwd);
 
 // Return the file extension (including the dot) as a view into `path`. If
 // `path` has no file extension, an empty string_view is returned.
@@ -301,8 +301,7 @@ std::string read_link(const std::string& path);
 // Return a normalized absolute path of `path`. On error (e.g. if the `path`
 // doesn't exist) the empty string is returned if return_empty_on_error is true,
 // otherwise `path` unmodified.
-std::string real_path(const std::string& path,
-                      bool return_empty_on_error = false);
+Path real_path(const std::string& path, bool return_empty_on_error = false);
 
 // Return a view into `path` containing the given path without the filename
 // extension as determined by `get_extension()`.

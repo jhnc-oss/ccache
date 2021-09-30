@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include "Path.hpp"
+
 #include "third_party/fmt/core.h"
 #include "third_party/nonstd/string_view.hpp"
 
@@ -39,6 +41,23 @@ template<> struct formatter<nonstd::string_view>
     -> decltype(ctx.out())
   {
     return format_to(ctx.out(), "{}", fmt::string_view(sv.data(), sv.size()));
+  }
+};
+
+template<> struct formatter<Path>
+{
+  template<typename ParseContext>
+  constexpr auto
+  parse(ParseContext& ctx) const -> decltype(ctx.begin())
+  {
+    return ctx.begin();
+  }
+
+  template<typename FormatContext>
+  auto
+  format(const Path& path, FormatContext& ctx) -> decltype(ctx.out())
+  {
+    return format_to(ctx.out(), "{}", path.str());
   }
 };
 

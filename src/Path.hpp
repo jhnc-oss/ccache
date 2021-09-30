@@ -1,8 +1,6 @@
 
 #pragma once
 
-#include "fmtmacros.hpp"
-
 #include "third_party/nonstd/string_view.hpp"
 
 #include <regex>
@@ -18,37 +16,13 @@ class Path
 {
   std::string origin;
 
-  static std::string
-  normalize(std::string p)
-  {
-#ifdef _WIN32
-    std::replace(p.begin(), p.end(), '\\', '/');
-
-    if (p.length() >= 3 && p[0] == '/') {
-      if (isalpha(p[1]) && p[2] == '/') {
-        // Transform /c/path... to c:/path...
-        p = FMT("{}:/{}", p[1], p.substr(3));
-      } else if (p[2] == ':') {
-        // Transform /c:/path to c:/path
-        p = p.substr(1);
-      }
-    }
-#endif
-    // TODO: resolve relative paths
-    // - x/y/z/../../a/b    => /x/a/b
-    // - /x/y/../../a/b     => /a/b
-    // - /x/y/../../../a/b  => /a/b
-    // - c:/x/../../../a/b  => c:/a/b
-    // - /x/y/./z           => /x/y/z
-
-    return p;
-  }
+  static std::string normalize(std::string p);
 
 public:
   Path(const std::string& s) : origin(normalize(s))
   {
   }
-  Path(nonstd::sv_lite::string_view s) : origin(normalize(std::string(s)))
+  Path(nonstd::string_view s) : origin(normalize(std::string(s)))
   {
   }
   Path(const Path&) = default;
@@ -62,31 +36,12 @@ public:
     return origin;
   }
 
-  operator nonstd::sv_lite::string_view() const
+  operator nonstd::string_view() const
   {
     return origin;
   }
 
-  std::string
-  foo() const
-  {
-    std::string s = origin;
-    std::string dir;
-    if (s[1] == ':') {
-      dir = FMT(R"((/{}|[\\/]?{}:)", s[0], s[0]);
-      s = s.substr(2);
-    }
-    size_t pos = s.find('/');
-    // Repeat till end is reached
-    std::string dir_sep_pattern = R"([\\/]+)";
-    while (pos != std::string::npos) {
-      // Replace this occurrence of Sub String
-      s.replace(pos, 1, dir_sep_pattern);
-      // Get the next occurrence from the current position
-      pos = s.find('/', pos + 6);
-    }
-    return dir + s;
-  }
+  std::string foo() const;
 
   COMP_OPERATOR(<)
   COMP_OPERATOR(>)
@@ -94,6 +49,13 @@ public:
   COMP_OPERATOR(<=)
   COMP_OPERATOR(>=)
   COMP_OPERATOR(!=)
+
+  Path
+  operator+(const std::string& rhs) const
+  {
+    std::string new_path = origin + rhs;
+    return Path(new_path);
+  }
 
   bool
   empty() const
@@ -105,6 +67,12 @@ public:
   c_str() const
   {
     return origin.c_str();
+  }
+
+  const std::string&
+  str() const
+  {
+    return origin;
   }
 
   template<typename... ARGS>

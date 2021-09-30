@@ -586,13 +586,13 @@ ensure_dir_exists(nonstd::string_view dir)
   }
 }
 
-std::string
+Path
 get_actual_cwd()
 {
   char buffer[PATH_MAX];
   if (getcwd(buffer, sizeof(buffer))) {
 #ifndef _WIN32
-    return buffer;
+    return Path(std::string(buffer));
 #else
     std::string cwd = buffer;
     std::replace(cwd.begin(), cwd.end(), '\\', '/');
@@ -603,7 +603,7 @@ get_actual_cwd()
   }
 }
 
-std::string
+Path
 get_apparent_cwd(const std::string& actual_cwd)
 {
 #ifdef _WIN32
@@ -891,6 +891,7 @@ normalize_absolute_path(string_view path)
   if (!util::is_absolute_path(path)) {
     return std::string(path);
   }
+  return Path(path);
 
 #ifdef _WIN32
   if (path.find("\\") != string_view::npos) {
@@ -1093,7 +1094,7 @@ read_link(const std::string& path)
 }
 #endif
 
-std::string
+Path
 real_path(const std::string& path, bool return_empty_on_error)
 {
   size_t buffer_size = path_max(path);

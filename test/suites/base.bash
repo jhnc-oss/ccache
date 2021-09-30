@@ -582,6 +582,7 @@ if $RUN_WIN_XFAIL; then
     mkdir dir1 dir2
     cp test1.c dir1
     cp test1.c dir2
+    export CCACHE_DEBUG=1
 
     cd dir1
     CCACHE_NOHASHDIR=1 $CCACHE_COMPILE -c test1.c -g

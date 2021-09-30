@@ -1111,7 +1111,7 @@ process_args(Context& ctx)
       LOG_RAW("No -c option found");
       // Having a separate statistic for autoconf tests is useful, as they are
       // the dominant form of "called for link" in many cases.
-      return args_info.input_file.find("conftest.") != std::string::npos
+      return args_info.input_file.str().find("conftest.") != std::string::npos
                ? Statistic::autoconf_test
                : Statistic::called_for_link;
     }

@@ -548,12 +548,12 @@ TEST_CASE("Util::normalize_absolute_path")
   //  CHECK(Util::normalize_absolute_path("x/./").str() == "x/./");
 
 #ifdef _WIN32
-  CHECK(Util::normalize_absolute_path("c:/").str() == "c:/");
-  CHECK(Util::normalize_absolute_path("c:\\").str() == "c:/");
-  CHECK(Util::normalize_absolute_path("c:/.").str() == "c:/");
-  CHECK(Util::normalize_absolute_path("c:\\..").str() == "c:/");
-  CHECK(Util::normalize_absolute_path("c:\\x/..").str() == "c:/");
-  CHECK(Util::normalize_absolute_path("c:\\x/./y\\..\\\\z").str() == "c:/x/z");
+  CHECK(Util::normalize_absolute_path("c:/").str() == "C:/");
+  CHECK(Util::normalize_absolute_path("c:\\").str() == "C:/");
+  CHECK(Util::normalize_absolute_path("c:/.").str() == "C:/");
+  CHECK(Util::normalize_absolute_path("c:\\..").str() == "C:/");
+  CHECK(Util::normalize_absolute_path("c:\\x/..").str() == "C:/");
+  CHECK(Util::normalize_absolute_path("c:\\x/./y\\..\\\\z").str() == "C:/x/z");
 #else
   CHECK(Util::normalize_absolute_path("/").str() == "/");
   CHECK(Util::normalize_absolute_path("/.").str() == "/");

@@ -6,15 +6,17 @@
 #include <regex>
 #include <string>
 
-#define COMP_OPERATOR(OP)                                      \
-  bool operator OP(std::string rhs) const                      \
-  {                                                            \
-    std::string lhs = origin;                                  \
-    std::transform(lhs.begin(), lhs.end(), lhs.begin(),        \
-    [](unsigned char c){ return std::tolower(c); });           \
-    std::transform(rhs.begin(), rhs.end(), rhs.begin(),        \
-    [](unsigned char c){ return std::tolower(c); });           \
-    return lhs OP rhs;                                         \
+#define COMP_OPERATOR(OP)                                                      \
+  bool operator OP(std::string rhs) const                                      \
+  {                                                                            \
+    std::string lhs = origin;                                                  \
+    std::transform(lhs.begin(), lhs.end(), lhs.begin(), [](unsigned char c) {  \
+      return std::tolower(c);                                                  \
+    });                                                                        \
+    std::transform(rhs.begin(), rhs.end(), rhs.begin(), [](unsigned char c) {  \
+      return std::tolower(c);                                                  \
+    });                                                                        \
+    return lhs OP rhs;                                                         \
   }
 
 class Path

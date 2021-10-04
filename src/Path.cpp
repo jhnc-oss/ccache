@@ -12,8 +12,7 @@ Path::normalize(std::string p)
 
   // strip ///c/xy from file:///c/xy ?
   p = std::regex_replace(
-      p, std::regex(R"(//+)"), "/", std::regex_constants::match_any);
-
+    p, std::regex(R"(//+)"), "/", std::regex_constants::match_any);
 
   if (p.length() >= 3 && p[0] == '/') {
     if (isalpha(p[1]) && p[2] == '/') {

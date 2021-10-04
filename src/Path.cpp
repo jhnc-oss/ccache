@@ -10,6 +10,11 @@ Path::normalize(std::string p)
   std::string drive;
   std::replace(p.begin(), p.end(), '\\', '/');
 
+  // strip ///c/xy from file:///c/xy ?
+  p = std::regex_replace(
+      p, std::regex(R"(//+)"), "/", std::regex_constants::match_any);
+
+
   if (p.length() >= 3 && p[0] == '/') {
     if (isalpha(p[1]) && p[2] == '/') {
       // Transform /c/path... to c:/path...
@@ -22,6 +27,7 @@ Path::normalize(std::string p)
 
   if (p.length() >= 2 && p[1] == ':') {
     drive = p.substr(0, 2);
+    drive[0] = std::toupper(drive[0]);
     p = p.substr(2);
   }
 

@@ -1101,24 +1101,22 @@ fi
 
     # -------------------------------------------------------------------------
     TEST "No object file due to bad prefix"
-if $RUN_WIN_XFAIL; then
     cat <<'EOF' >test_no_obj.c
 int test_no_obj;
 EOF
-    cat <<'EOF' >no-object-prefix
+    cat <<'EOF' >no-object-prefix.sh
 #!/bin/sh
 # Emulate no object file from the compiler.
 EOF
-    chmod +x no-object-prefix
-    CCACHE_PREFIX=$(pwd)/no-object-prefix $CCACHE_COMPILE -c test_no_obj.c
+    chmod +x no-object-prefix.sh
+    CCACHE_PREFIX=$(pwd)/no-object-prefix.sh $CCACHE_COMPILE -c test_no_obj.c
     expect_stat compiler_produced_no_output 1
 
-    CCACHE_PREFIX=$(pwd)/no-object-prefix $CCACHE_COMPILE -c test1.c
+    CCACHE_PREFIX=$(pwd)/no-object-prefix.sh $CCACHE_COMPILE -c test1.c
     expect_stat preprocessed_cache_hit 0
     expect_stat cache_miss 0
     expect_stat files_in_cache 0
     expect_stat compiler_produced_no_output 2
-fi
 
     # -------------------------------------------------------------------------
     TEST "No object file due to -fsyntax-only"
@@ -1143,23 +1141,21 @@ fi
 
     # -------------------------------------------------------------------------
     TEST "Empty object file"
-if $RUN_WIN_XFAIL; then
     cat <<'EOF' >test_empty_obj.c
 int test_empty_obj;
 EOF
-    cat <<'EOF' >empty-object-prefix
+    cat <<'EOF' >empty-object-prefix.sh
 #!/bin/sh
 # Emulate empty object file from the compiler.
 touch test_empty_obj.o
 EOF
-    chmod +x empty-object-prefix
-    CCACHE_PREFIX=`pwd`/empty-object-prefix $CCACHE_COMPILE -c test_empty_obj.c
+    chmod +x empty-object-prefix.sh
+    CCACHE_PREFIX=`pwd`/empty-object-prefix.sh $CCACHE_COMPILE -c test_empty_obj.c
     expect_stat compiler_produced_empty_output 1
-fi
 
     # -------------------------------------------------------------------------
     TEST "Output to /dev/null"
-if $RUN_WIN_XFAIL; then
+if ! $HOST_OS_WINDOWS; then
     $CCACHE_COMPILE -c test1.c
     expect_stat preprocessed_cache_hit 0
     expect_stat cache_miss 1
@@ -1414,7 +1410,6 @@ EOF
     expect_stat cache_miss 1
 fi
     # -------------------------------------------------------------------------
-if ! $HOST_OS_WINDOWS; then
     TEST ".incbin"
 
     touch empty.bin
@@ -1436,7 +1431,6 @@ EOF
     expect_stat preprocessed_cache_hit 0
     expect_stat cache_miss 0
     expect_stat unsupported_code_directive 2
-fi
 
     # -------------------------------------------------------------------------
 if ! $HOST_OS_WINDOWS; then

@@ -11,6 +11,7 @@ set(
   test_Hash.cpp
   test_Lockfile.cpp
   test_NullCompression.cpp
+  test_Path.cpp
   test_Stat.cpp
   test_Util.cpp
   test_ZstdCompression.cpp

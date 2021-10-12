@@ -453,12 +453,12 @@ TEST_CASE("Util::make_relative_path")
 
   const TestContext test_context;
 
-  const std::string cwd = Util::get_actual_cwd();
-  const std::string actual_cwd = FMT("{}/d", cwd);
+  const Path cwd = Util::get_actual_cwd();
+  const Path actual_cwd = FMT("{}/d", cwd);
 #ifdef _WIN32
-  const std::string apparent_cwd = actual_cwd;
+  const Path apparent_cwd = actual_cwd;
 #else
-  const std::string apparent_cwd = FMT("{}/s", cwd);
+  const Path apparent_cwd = FMT("{}/s", cwd);
 #endif
 
   REQUIRE(Util::create_dir("d"));
@@ -470,13 +470,18 @@ TEST_CASE("Util::make_relative_path")
 
   SUBCASE("No base directory")
   {
-    CHECK(make_relative_path("", "/a", "/a", "/a/x") == "/a/x");
+    CHECK(make_relative_path(Path(""), Path("/ab"), Path("/ab"), Path("/ab/x"))
+            .str()
+          == "/ab/x");
   }
 
   SUBCASE("Path matches neither actual nor apparent CWD")
   {
 #ifdef _WIN32
-    CHECK(make_relative_path("C:/", "C:/a", "C:/b", "C:/x") == "C:/x");
+    CHECK(
+      make_relative_path(Path("C:/"), Path("C:/a"), Path("C:/b"), Path("C:/x"))
+        .str()
+      == "C:/x");
 #else
     CHECK(make_relative_path("/", "/a", "/b", "/x") == "/x");
 #endif
@@ -488,6 +493,7 @@ TEST_CASE("Util::make_relative_path")
     CHECK(
       make_relative_path(
         actual_cwd.substr(0, 3), actual_cwd, apparent_cwd, actual_cwd + "/x")
+        .str()
       == "./x");
 #else
     CHECK(make_relative_path("/", actual_cwd, apparent_cwd, actual_cwd + "/x")

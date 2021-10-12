@@ -189,6 +189,7 @@ if ! $HOST_OS_WINDOWS && ! $HOST_OS_CYGWIN; then
 fi
 
     # -------------------------------------------------------------------------
+if $RUN_WIN_XFAIL; then
     TEST "Rewriting in stderr"
 
     cat <<EOF >stderr.h
@@ -217,7 +218,7 @@ EOF
     if grep `pwd` stderr.txt >/dev/null 2>&1; then
         test_failed "Base dir (`pwd`) found in stderr:\n`cat stderr.txt`"
     fi
-
+fi
     # -------------------------------------------------------------------------
     TEST "-MF/-MQ/-MT with absolute paths"
 

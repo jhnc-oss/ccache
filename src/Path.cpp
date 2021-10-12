@@ -1,7 +1,9 @@
 
 #include "Path.hpp"
 
+#include "Util.hpp"
 #include "fmtmacros.hpp"
+#include "util/path.hpp"
 
 std::string
 Path::normalize(std::string p)
@@ -105,4 +107,74 @@ Path::foo() const
     pos = s.find('/', pos + 6);
   }
   return dir + s;
+}
+
+bool
+Path::starts_with(const Path& prefix) const
+{
+  // prefix musst be shorter than path
+  if (prefix.origin.size() >= origin.size()) {
+    return false;
+  }
+  for (size_t i = 0; i < prefix.origin.size(); ++i) {
+    if (prefix.origin[i] != origin[i]) {
+#ifdef _WIN32
+      if (std::tolower(prefix.origin[i]) != std::tolower(origin[i])) {
+        return false;
+      }
+#else
+      return false;
+#endif
+    }
+  }
+  return true;
+}
+
+size_t
+Path::common_prefix_length_with(const Path& dir) const
+{
+  size_t len = std::max(origin.size(), dir.origin.size());
+
+  for (size_t i = 0; i < len; ++i) {
+    if (dir.origin[i] != origin[i]) {
+#ifdef _WIN32
+      if (std::tolower(dir.origin[i]) != std::tolower(origin[i])) {
+        return i;
+      }
+#else
+      return i;
+#endif
+    }
+  }
+  return len;
+}
+
+Path
+Path::relativ_to(const Path& dir) const
+{
+  ASSERT(util::is_absolute_path(dir));
+  ASSERT(util::is_absolute_path(origin));
+
+  std::string result;
+
+  size_t common_prefix_len = common_prefix_length_with(dir);
+
+  if (common_prefix_len > 0 || dir != "/") {
+    for (size_t i = common_prefix_len; i < dir.origin.length(); ++i) {
+      if (dir.origin[i] == '/') {
+        if (!result.empty()) {
+          result += '/';
+        }
+        result += "..";
+      }
+    }
+  }
+  if (origin.length() > common_prefix_len) {
+    if (!result.empty()) {
+      result += '/';
+    }
+    result += std::string(origin.substr(common_prefix_len + 1));
+  }
+  result.erase(result.find_last_not_of('/') + 1);
+  return result.empty() ? "." : result;
 }

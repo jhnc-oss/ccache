@@ -799,51 +799,34 @@ localtime(optional<time_t> time)
   }
 }
 
-std::string
-make_relative_path(const std::string& base_dir,
-                   const std::string& actual_cwd,
-                   const std::string& apparent_cwd,
-                   nonstd::string_view path)
+Path
+make_relative_path(const Path& base_dir,
+                   const Path& actual_cwd,
+                   const Path& apparent_cwd,
+                   const Path& original_path)
 {
-  if (base_dir.empty() || !util::starts_with(path, base_dir)) {
-    return std::string(path);
+  if (base_dir.empty() || !original_path.starts_with(base_dir)) {
+    return original_path;
   }
-
-#ifdef _WIN32
-  std::string winpath;
-  if (path.length() >= 3 && path[0] == '/') {
-    if (isalpha(path[1]) && path[2] == '/') {
-      // Transform /c/path... to c:/path...
-      winpath = FMT("{}:/{}", path[1], path.substr(3));
-      path = winpath;
-    } else if (path[2] == ':') {
-      // Transform /c:/path to c:/path
-      winpath = std::string(path.substr(1));
-      path = winpath;
-    }
-  }
-#endif
 
   // The algorithm for computing relative paths below only works for existing
   // paths. If the path doesn't exist, find the first ancestor directory that
   // does exist and assemble the path again afterwards.
 
   std::vector<std::string> relpath_candidates;
-  const auto original_path = path;
+  auto path = original_path;
   Stat path_stat;
   while (!(path_stat = Stat::stat(std::string(path)))) {
-    path = Util::dir_name(path);
+    path = path.dir_name();
   }
   const auto path_suffix = std::string(original_path.substr(path.length()));
   const auto real_path = Util::real_path(std::string(path));
 
   const auto add_relpath_candidates = [&](auto path) {
-    const std::string normalized_path = Util::normalize_absolute_path(path);
-    relpath_candidates.push_back(
-      Util::get_relative_path(actual_cwd, normalized_path));
+    const Path normalized_path = Util::normalize_absolute_path(path);
+    relpath_candidates.push_back(normalized_path.relativ_to(actual_cwd));
     if (apparent_cwd != actual_cwd) {
-      relpath_candidates.emplace_back(
-        Util::get_relative_path(apparent_cwd, normalized_path));
+      relpath_candidates.push_back(normalized_path.relativ_to(apparent_cwd));
     }
   };
   add_relpath_candidates(path);
@@ -864,7 +847,7 @@ make_relative_path(const std::string& base_dir,
   }
 
   // No match so nothing else to do than to return the unmodified path.
-  return std::string(original_path);
+  return original_path;
 }
 
 std::string

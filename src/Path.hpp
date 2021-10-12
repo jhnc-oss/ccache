@@ -32,6 +32,9 @@ public:
   Path(nonstd::string_view s) : origin(normalize(std::string(s)))
   {
   }
+  Path(const char* s) : origin(normalize(std::string(s)))
+  {
+  }
   Path(const Path&) = default;
   Path() = default;
 
@@ -82,11 +85,43 @@ public:
     return origin;
   }
 
+  size_t
+  length() const
+  {
+    return origin.length();
+  }
+
   template<typename... ARGS>
   std::string
   substr(ARGS... args) const
   {
     return origin.substr(args...);
+  }
+
+  bool starts_with(const Path& prefix) const;
+
+  size_t common_prefix_length_with(const Path& dir) const;
+  Path relativ_to(const Path& dir) const;
+
+  Path
+  dir_name() const
+  {
+    size_t n = origin.find_last_of('/');
+    if (n == std::string::npos) {
+      // "foo" -> "."
+      return std::string(".");
+    } else if (n == 0) {
+      // "/" -> "/" (Windows: or "\\" -> "\\")
+      return Path(origin.substr(0, 1));
+#ifdef _WIN32
+    } else if (n == 2 && origin[1] == ':') {
+      // Windows: "C:\\foo" -> "C:\\" or "C:/foo" -> "C:/"
+      return origin.substr(0, 3);
+#endif
+    } else {
+      // "/dir/foo" -> "/dir" (Windows: or "C:\\dir\\foo" -> "C:\\dir")
+      return origin.substr(0, n);
+    }
   }
 };
 

@@ -133,17 +133,22 @@ Path::starts_with(const Path& prefix) const
 size_t
 Path::common_prefix_length_with(const Path& dir) const
 {
-  size_t len = std::max(origin.size(), dir.origin.size());
+  size_t len = std::min(origin.size(), dir.origin.size());
 
+  size_t last_slash = 0;
   for (size_t i = 0; i < len; ++i) {
+
     if (dir.origin[i] != origin[i]) {
 #ifdef _WIN32
       if (std::tolower(dir.origin[i]) != std::tolower(origin[i])) {
-        return i;
+        return last_slash;
       }
 #else
-      return i;
+      return last_slash;
 #endif
+    }
+    if(origin[i] == '/'){
+      last_slash = i;
     }
   }
   return len;

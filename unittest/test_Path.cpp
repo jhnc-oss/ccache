@@ -85,5 +85,4 @@ TEST_CASE("relativ_to")
   Path p = "/home/user/aaa/bbb/cccc";
   CHECK(p.relativ_to("/home/user/").str() == "aaa/bbb/cccc");
   CHECK(p.relativ_to("/home/user/x/y/z").str() == "../../../aaa/bbb/cccc");
-  CHECK(p.relativ_to("/home/user/").str() == "./aaa/bbb/cccc");
 }

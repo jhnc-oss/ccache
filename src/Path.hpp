@@ -91,6 +91,18 @@ public:
     return origin.length();
   }
 
+  void
+  erase(const std::size_t begin, const std::size_t end)
+  {
+    origin.erase(begin, end);
+  }
+
+  void
+  update_origin(std::string&& x)
+  {
+    origin = std::move(x);
+  }
+
   template<typename... ARGS>
   std::string
   substr(ARGS... args) const

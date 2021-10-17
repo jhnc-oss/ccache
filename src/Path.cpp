@@ -5,16 +5,20 @@
 #include "fmtmacros.hpp"
 #include "util/path.hpp"
 
+#include <iostream>
+
 std::string
 Path::normalize(std::string p)
 {
+  const static auto duplicated_slashes = std::regex(R"(//+)");
+
 #ifdef _WIN32
   std::string drive;
   std::replace(p.begin(), p.end(), '\\', '/');
 
   // strip ///c/xy from file:///c/xy ?
   p = std::regex_replace(
-    p, std::regex(R"(//+)"), "/", std::regex_constants::match_any);
+    p, duplicated_slashes, "/", std::regex_constants::match_any);
 
   if (p.length() >= 3 && p[0] == '/') {
     if (isalpha(p[1]) && p[2] == '/') {
@@ -37,23 +41,23 @@ Path::normalize(std::string p)
   // TODO: This block is not really performant.
 
   // todo: ignore // at begin.
+  const static auto regex_var = std::regex(R"((/\.)+(/|$))");
+  p = std::regex_replace(p, regex_var, "/", std::regex_constants::match_any);
 
   p = std::regex_replace(
-    p, std::regex(R"((/\.)+(/|$))"), "/", std::regex_constants::match_any);
+    p, duplicated_slashes, "/", std::regex_constants::match_any);
 
-  p = std::regex_replace(
-    p, std::regex(R"(//+)"), "/", std::regex_constants::match_any);
+  const static auto regex_magic = std::regex(R"(/[^/]*[^/\.][^/]*/\.\.(/|$))");
 
   std::string p_old;
   do {
     p_old = p;
-    p = std::regex_replace(p,
-                           std::regex(R"(/[^/]*[^/\.][^/]*/\.\.(/|$))"),
-                           "$1",
-                           std::regex_constants::match_any);
+    p =
+      std::regex_replace(p, regex_magic, "$1", std::regex_constants::match_any);
   } while (p != p_old);
 
-  p = std::regex_replace(p, std::regex(R"(^(/\.\.)+(/|$))"), "/");
+  const static auto regex_vodoo = std::regex(R"(^(/\.\.)+(/|$))");
+  p = std::regex_replace(p, regex_vodoo, "/");
 
   // TODO: resolve relative paths
   // - /x/y/z/../../a/b   => /x/a/b

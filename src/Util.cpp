@@ -840,7 +840,7 @@ make_relative_path(const Path& base_dir,
   return original_path;
 }
 
-std::string
+Path
 make_relative_path(const Context& ctx, Path path)
 {
   return make_relative_path(

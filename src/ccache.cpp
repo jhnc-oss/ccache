@@ -270,12 +270,10 @@ include_file_too_new(const Context& ctx,
 // the direct mode (or, in the case of a preprocessed header, fall back to just
 // running the real compiler), otherwise true.
 static bool
-do_remember_include_file(Context& ctx,
-                         std::string path,
-                         Hash& cpp_hash,
-                         bool system,
-                         Hash* depend_mode_hash)
+do_remember_include_file(
+  Context& ctx, Path p, Hash& cpp_hash, bool system, Hash* depend_mode_hash)
 {
+  std::string path = p;
   if (path.length() >= 2 && path[0] == '<' && path[path.length() - 1] == '>') {
     // Typically <built-in> or <command-line>.
     return true;
@@ -293,11 +291,11 @@ do_remember_include_file(Context& ctx,
   }
 
   // Canonicalize path for comparison; Clang uses ./header.h.
-  if (util::starts_with(path, "./")) {
-    path.erase(0, 2);
+  if (util::starts_with(p, "./")) {
+    p.erase(0, 2);
   }
 
-  if (ctx.included_files.find(path) != ctx.included_files.end()) {
+  if (ctx.included_files.find(p) != ctx.included_files.end()) {
     // Already known include file.
     return true;
   }
@@ -364,7 +362,7 @@ do_remember_include_file(Context& ctx,
       // to prevent hashing a very large .pch file every time
       std::string pch_sum_path = FMT("{}.sum", path);
       if (Stat::stat(pch_sum_path, Stat::OnError::log)) {
-        path = std::move(pch_sum_path);
+        p.update_origin(std::move(pch_sum_path));
         using_pch_sum = true;
         LOG("Using pch.sum file {}", path);
       }
@@ -387,7 +385,7 @@ do_remember_include_file(Context& ctx,
     }
 
     Digest d = fhash.digest();
-    ctx.included_files.emplace(path, d);
+    ctx.included_files.emplace(p, d);
 
     if (depend_mode_hash) {
       depend_mode_hash->hash_delimiter("include");
@@ -404,7 +402,7 @@ enum class RememberIncludeFileResult { ok, cannot_use_pch };
 // ctx.included_files. If the include file is a PCH, cpp_hash is also updated.
 static RememberIncludeFileResult
 remember_include_file(Context& ctx,
-                      const std::string& path,
+                      const Path& path,
                       Hash& cpp_hash,
                       bool system,
                       Hash* depend_mode_hash)
@@ -545,15 +543,15 @@ process_preprocessed_file(Context& ctx,
         r++;
       }
       // p and q span the include file path.
-      std::string inc_path(p, q - p);
+      std::string inc_string(p, q - p);
       if (!ctx.has_absolute_include_headers) {
-        ctx.has_absolute_include_headers = util::is_absolute_path(inc_path);
+        ctx.has_absolute_include_headers = util::is_absolute_path(inc_string);
       }
 
-      inc_path = Util::make_relative_path(ctx, inc_path);
+      Path inc_path = Util::make_relative_path(ctx, inc_string);
 
       bool should_hash_inc_path = true;
-      if (!ctx.config.hash_dir() && (Path(inc_path) == ctx.apparent_cwd)) {
+      if (!ctx.config.hash_dir() && (inc_path == ctx.apparent_cwd)) {
         should_hash_inc_path = false;
       }
       if (should_hash_inc_path) {
@@ -600,7 +598,7 @@ process_preprocessed_file(Context& ctx,
   // Explicitly check the .gch/.pch/.pth file as Clang does not include any
   // mention of it in the preprocessed output.
   if (!ctx.args_info.included_pch_file.empty()) {
-    std::string pch_path =
+    auto pch_path =
       Util::make_relative_path(ctx, ctx.args_info.included_pch_file);
     hash.hash(pch_path);
     remember_include_file(ctx, pch_path, hash, false, nullptr);
@@ -635,14 +633,14 @@ result_key_from_depfile(Context& ctx, Hash& hash)
     if (!ctx.has_absolute_include_headers) {
       ctx.has_absolute_include_headers = util::is_absolute_path(token);
     }
-    std::string path = Util::make_relative_path(ctx, token);
+    auto path = Util::make_relative_path(ctx, token);
     remember_include_file(ctx, path, hash, false, &hash);
   }
 
   // Explicitly check the .gch/.pch/.pth file as it may not be mentioned in the
   // dependencies output.
   if (!ctx.args_info.included_pch_file.empty()) {
-    std::string pch_path =
+    auto pch_path =
       Util::make_relative_path(ctx, ctx.args_info.included_pch_file);
     hash.hash(pch_path);
     remember_include_file(ctx, pch_path, hash, false, nullptr);

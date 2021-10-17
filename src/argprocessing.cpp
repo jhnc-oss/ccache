@@ -620,7 +620,7 @@ process_arg(const Context& ctx,
   if (util::starts_with(args[i], "--sysroot=")) {
     auto path = string_view(args[i]).substr(10);
     auto relpath = Util::make_relative_path(ctx, path);
-    state.common_args.push_back("--sysroot=" + relpath);
+    state.common_args.push_back("--sysroot=" + std::string(relpath));
     return nullopt;
   }
 
@@ -850,7 +850,7 @@ process_arg(const Context& ctx,
     if (!option.empty()) {
       if (compopt_takes_concat_arg(option) && compopt_takes_path(option)) {
         auto path = Path(args[i].substr(option.size()));
-        auto relpath = Util::make_relative_path(ctx, path);
+        std::string relpath = Util::make_relative_path(ctx, path);
         std::string new_option = option + relpath;
         if (compopt_affects_cpp_output(option)) {
           state.cpp_args.push_back(new_option);

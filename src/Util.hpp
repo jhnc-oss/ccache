@@ -256,7 +256,7 @@ Path make_relative_path(const Path& base_dir,
                         const Path& path);
 
 // Like above but with base directory and apparent/actual CWD taken from `ctx`.
-std::string make_relative_path(const Context& ctx, Path path);
+Path make_relative_path(const Context& ctx, Path path);
 
 // Return whether `path` is equal to `dir_prefix_or_file` or if
 // `dir_prefix_or_file` is a directory prefix of `path`.

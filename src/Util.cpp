@@ -591,13 +591,7 @@ get_actual_cwd()
 {
   char buffer[PATH_MAX];
   if (getcwd(buffer, sizeof(buffer))) {
-#ifndef _WIN32
-    return Path(std::string(buffer));
-#else
-    std::string cwd = buffer;
-    std::replace(cwd.begin(), cwd.end(), '\\', '/');
-    return cwd;
-#endif
+    return Path(buffer);
   } else {
     return {};
   }
@@ -606,9 +600,6 @@ get_actual_cwd()
 Path
 get_apparent_cwd(const std::string& actual_cwd)
 {
-#ifdef _WIN32
-  return actual_cwd;
-#else
   auto pwd = getenv("PWD");
   if (!pwd || !util::is_absolute_path(pwd)) {
     return actual_cwd;
@@ -624,7 +615,6 @@ get_apparent_cwd(const std::string& actual_cwd)
              || Stat::stat(normalized_pwd).same_inode_as(pwd_stat)
            ? normalized_pwd
            : pwd;
-#endif
 }
 
 string_view

@@ -17,6 +17,7 @@ SUITE_basedir() {
     # -------------------------------------------------------------------------
     TEST "Enabled CCACHE_BASEDIR"
 
+    export CCACHE_DEBUG=1
     cd dir1
     CCACHE_BASEDIR="`pwd`" $CCACHE_COMPILE -I`pwd`/include -c src/test.c
     expect_stat direct_cache_hit 0
@@ -231,8 +232,6 @@ fi
         clear_cache
 
         cd dir1
-        echo  CCACHE_BASEDIR="`pwd`" $CCACHE_COMPILE -I`pwd`/include -MD -${option}`pwd`/test.d -c src/test.c
-
         CCACHE_BASEDIR="`pwd`" $CCACHE_COMPILE -I`pwd`/include -MD -${option}`pwd`/test.d -c src/test.c
         expect_stat direct_cache_hit 0
         expect_stat preprocessed_cache_hit 0

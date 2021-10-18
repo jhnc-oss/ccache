@@ -112,8 +112,8 @@ Path::foo() const
 bool
 Path::starts_with(const Path& prefix) const
 {
-  // prefix musst be shorter than path
-  if (prefix.origin.size() >= origin.size()) {
+  // path musst not be shorter than prefix
+  if ( origin.size() < prefix.origin.size() ) {
     return false;
   }
   for (size_t i = 0; i < prefix.origin.size(); ++i) {

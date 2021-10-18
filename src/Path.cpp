@@ -113,7 +113,7 @@ bool
 Path::starts_with(const Path& prefix) const
 {
   // path musst not be shorter than prefix
-  if ( origin.size() < prefix.origin.size() ) {
+  if (origin.size() < prefix.origin.size()) {
     return false;
   }
   for (size_t i = 0; i < prefix.origin.size(); ++i) {

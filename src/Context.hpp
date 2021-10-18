@@ -83,7 +83,6 @@ public:
   // The name of the cpp stderr file.
   Path cpp_stderr;
 
-
   // Headers (or directories with headers) to ignore in manifest mode.
   std::vector<Path> ignore_header_paths;
 

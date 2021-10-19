@@ -97,12 +97,6 @@ public:
     origin.erase(begin, end);
   }
 
-  void
-  update_origin(std::string&& x)
-  {
-    origin = std::move(x);
-  }
-
   template<typename... ARGS>
   std::string
   substr(ARGS... args) const

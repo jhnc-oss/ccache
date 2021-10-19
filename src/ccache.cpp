@@ -362,7 +362,8 @@ do_remember_include_file(
       // to prevent hashing a very large .pch file every time
       std::string pch_sum_path = FMT("{}.sum", path);
       if (Stat::stat(pch_sum_path, Stat::OnError::log)) {
-        p.update_origin(std::move(pch_sum_path));
+        path = std::move(pch_sum_path);
+        p = Path(path);
         using_pch_sum = true;
         LOG("Using pch.sum file {}", path);
       }

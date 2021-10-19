@@ -293,6 +293,7 @@ do_remember_include_file(
   // Canonicalize path for comparison; Clang uses ./header.h.
   if (util::starts_with(p, "./")) {
     p.erase(0, 2);
+    path = std::string(p);
   }
 
   if (ctx.included_files.find(p) != ctx.included_files.end()) {

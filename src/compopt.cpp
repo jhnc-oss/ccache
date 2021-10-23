@@ -150,14 +150,6 @@ compare_compopts(const void* key1, const void* key2)
   return strcmp(opt1->name, opt2->name);
 }
 
-static int
-compare_prefix_compopts(const void* key1, const void* key2)
-{
-  const CompOpt* opt1 = static_cast<const CompOpt*>(key1);
-  const CompOpt* opt2 = static_cast<const CompOpt*>(key2);
-  return strncmp(opt1->name, opt2->name, strlen(opt2->name));
-}
-
 static const CompOpt*
 find(const std::string& option)
 {
@@ -174,14 +166,29 @@ find(const std::string& option)
 static const CompOpt*
 find_prefix(const std::string& option)
 {
-  CompOpt key;
-  key.name = option.c_str();
-  void* result = bsearch(&key,
-                         compopts,
-                         ARRAY_SIZE(compopts),
-                         sizeof(compopts[0]),
-                         compare_prefix_compopts);
-  return static_cast<CompOpt*>(result);
+  /*
+  Binary search does not work reliably for this task.
+  For options with the same prefix but different length (e.g. '-include' and
+  '-include-pch') it can happen that no result is found. As an example:
+  strcmp("-include/home...", "-include-pch") returns a positive number
+  and
+  strcmp("-includeC:/home...", "-include-pch") returns a negative number.
+
+  In order to be able to search here also with logarithmic complexity,
+  a search tree or a FSM should be constructed initially.
+  */
+
+  for (const CompOpt& opt2 : compopts) {
+    auto c = strncmp(option.c_str(), opt2.name, strlen(opt2.name));
+    if (c == 0) {
+      return &opt2;
+    }
+
+    if (c < 0) {
+      break;
+    }
+  }
+  return nullptr;
 }
 
 // Used by unittest/test_compopt.cpp.

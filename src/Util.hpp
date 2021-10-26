@@ -17,6 +17,7 @@
 // Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #pragma once
+#include "Path.hpp"
 
 #include <Stat.hpp>
 #include <util/Tokenizer.hpp>
@@ -162,13 +163,13 @@ std::string format_parsable_size_with_suffix(uint64_t size);
 
 // Return current working directory (CWD) as returned from getcwd(3) (i.e.,
 // normalized path without symlink parts). Returns the empty string on error.
-std::string get_actual_cwd();
+Path get_actual_cwd();
 
 // Return current working directory (CWD) by reading the environment variable
 // PWD (thus keeping any symlink parts in the path and potentially ".." or "//"
 // parts). If PWD does not resolve to the same i-node as `actual_cwd` then
 // `actual_cwd` is returned instead.
-std::string get_apparent_cwd(const std::string& actual_cwd);
+Path get_apparent_cwd(const std::string& actual_cwd);
 
 // Return the file extension (including the dot) as a view into `path`. If
 // `path` has no file extension, an empty string_view is returned.
@@ -185,8 +186,7 @@ const char* get_hostname();
 // `path` (an absolute path). Assumes that both `dir` and `path` are normalized.
 // The algorithm does *not* follow symlinks, so the result may not actually
 // resolve to the same file as `path`.
-std::string get_relative_path(nonstd::string_view dir,
-                              nonstd::string_view path);
+Path get_relative_path(nonstd::string_view dir, nonstd::string_view path);
 
 // Hard-link `oldpath` to `newpath`. Throws `core::Error` on error.
 void hard_link(const std::string& oldpath, const std::string& newpath);
@@ -250,13 +250,13 @@ nonstd::optional<tm> localtime(nonstd::optional<time_t> time = {});
 
 // Make a relative path from current working directory (either `actual_cwd` or
 // `apparent_cwd`) to `path` if `path` is under `base_dir`.
-std::string make_relative_path(const std::string& base_dir,
-                               const std::string& actual_cwd,
-                               const std::string& apparent_cwd,
-                               nonstd::string_view path);
+Path make_relative_path(const Path& base_dir,
+                        const Path& actual_cwd,
+                        const Path& apparent_cwd,
+                        const Path& path);
 
 // Like above but with base directory and apparent/actual CWD taken from `ctx`.
-std::string make_relative_path(const Context& ctx, nonstd::string_view path);
+Path make_relative_path(const Context& ctx, const Path& path);
 
 // Return whether `path` is equal to `dir_prefix_or_file` or if
 // `dir_prefix_or_file` is a directory prefix of `path`.
@@ -270,7 +270,7 @@ bool matches_dir_prefix_or_file(nonstd::string_view dir_prefix_or_file,
 // symlinks, so the result may not actually resolve to `path`.
 //
 // On Windows: Backslashes are replaced with forward slashes.
-std::string normalize_absolute_path(nonstd::string_view path);
+Path normalize_absolute_path(nonstd::string_view path);
 
 // Parse `duration`, an unsigned integer with d (days) or s (seconds) suffix,
 // into seconds. Throws `core::Error` on error.
@@ -301,8 +301,7 @@ std::string read_link(const std::string& path);
 // Return a normalized absolute path of `path`. On error (e.g. if the `path`
 // doesn't exist) the empty string is returned if return_empty_on_error is true,
 // otherwise `path` unmodified.
-std::string real_path(const std::string& path,
-                      bool return_empty_on_error = false);
+Path real_path(const std::string& path, bool return_empty_on_error = false);
 
 // Return a view into `path` containing the given path without the filename
 // extension as determined by `get_extension()`.
@@ -349,6 +348,12 @@ std::vector<nonstd::string_view> split_into_views(
 
 // Same as `split_into_views` but the tokens are copied from `string`.
 std::vector<std::string> split_into_strings(
+  nonstd::string_view string,
+  const char* separators,
+  util::Tokenizer::Mode mode = util::Tokenizer::Mode::skip_empty);
+
+// Same as `split_into_views` ... .
+std::vector<Path> split_into_paths(
   nonstd::string_view string,
   const char* separators,
   util::Tokenizer::Mode mode = util::Tokenizer::Mode::skip_empty);

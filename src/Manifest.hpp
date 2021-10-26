@@ -29,6 +29,7 @@
 class Config;
 class Context;
 class Digest;
+class Path;
 
 namespace Manifest {
 
@@ -40,7 +41,7 @@ nonstd::optional<Digest> get(const Context& ctx, const std::string& path);
 bool put(const Config& config,
          const std::string& path,
          const Digest& result_key,
-         const std::unordered_map<std::string, Digest>& included_files,
+         const std::unordered_map<Path, Digest>& included_files,
          time_t time_of_compilation,
          bool save_timestamp);
 bool dump(const std::string& path, FILE* stream);

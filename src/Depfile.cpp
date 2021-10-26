@@ -83,13 +83,18 @@ rewrite_paths(const Context& ctx, const std::string& file_content)
 
       const auto& token = tokens[i];
       bool token_rewritten = false;
-      if (util::is_absolute_path(token)) {
-        const auto new_path = Util::make_relative_path(ctx, token);
-        if (new_path != token) {
-          adjusted_file_content.append(new_path);
-          token_rewritten = true;
+
+      if (token != "\\" && token != "\n") {
+        Path path = token;
+        if (util::is_absolute_path(path)) {
+          const auto new_path = Util::make_relative_path(ctx, path);
+          if (new_path != path) {
+            adjusted_file_content.append(new_path);
+            token_rewritten = true;
+          }
         }
       }
+
       if (token_rewritten) {
         content_rewritten = true;
       } else {

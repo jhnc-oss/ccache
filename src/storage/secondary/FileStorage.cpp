@@ -56,7 +56,7 @@ public:
 private:
   enum class Layout { flat, subdirs };
 
-  const std::string m_dir;
+  const Path m_dir;
   nonstd::optional<mode_t> m_umask;
   bool m_update_mtime = false;
   Layout m_layout = Layout::subdirs;

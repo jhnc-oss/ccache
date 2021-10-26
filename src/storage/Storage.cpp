@@ -265,7 +265,7 @@ Storage::get(const Digest& key, const core::CacheEntryType type)
   const auto& value = value_and_share_hits->first;
   const auto& share_hits = value_and_share_hits->second;
 
-  TemporaryFile tmp_file(FMT("{}/tmp.get", m_config.temporary_dir()));
+  TemporaryFile tmp_file(FMT("{}/tmp.get", m_config.temporary_dir().c_str()));
   m_tmp_files.push_back(tmp_file.path);
   try {
     Util::write_file(tmp_file.path, value);

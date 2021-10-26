@@ -22,6 +22,7 @@
 #include "Context.hpp"
 #include "Fd.hpp"
 #include "Logging.hpp"
+#include "Path.hpp"
 #include "TemporaryFile.hpp"
 #include "Win32Util.hpp"
 #include "fmtmacros.hpp"
@@ -586,29 +587,20 @@ ensure_dir_exists(nonstd::string_view dir)
   }
 }
 
-std::string
+Path
 get_actual_cwd()
 {
   char buffer[PATH_MAX];
   if (getcwd(buffer, sizeof(buffer))) {
-#ifndef _WIN32
-    return buffer;
-#else
-    std::string cwd = buffer;
-    std::replace(cwd.begin(), cwd.end(), '\\', '/');
-    return cwd;
-#endif
+    return Path(buffer);
   } else {
     return {};
   }
 }
 
-std::string
+Path
 get_apparent_cwd(const std::string& actual_cwd)
 {
-#ifdef _WIN32
-  return actual_cwd;
-#else
   auto pwd = getenv("PWD");
   if (!pwd || !util::is_absolute_path(pwd)) {
     return actual_cwd;
@@ -624,7 +616,6 @@ get_apparent_cwd(const std::string& actual_cwd)
              || Stat::stat(normalized_pwd).same_inode_as(pwd_stat)
            ? normalized_pwd
            : pwd;
-#endif
 }
 
 string_view
@@ -688,7 +679,7 @@ get_hostname()
   return hostname;
 }
 
-std::string
+Path
 get_relative_path(string_view dir, string_view path)
 {
   ASSERT(util::is_absolute_path(dir));
@@ -799,51 +790,33 @@ localtime(optional<time_t> time)
   }
 }
 
-std::string
-make_relative_path(const std::string& base_dir,
-                   const std::string& actual_cwd,
-                   const std::string& apparent_cwd,
-                   nonstd::string_view path)
+Path
+make_relative_path(const Path& base_dir,
+                   const Path& actual_cwd,
+                   const Path& apparent_cwd,
+                   const Path& original_path)
 {
-  if (base_dir.empty() || !util::starts_with(path, base_dir)) {
-    return std::string(path);
+  if (base_dir.empty() || !original_path.starts_with(base_dir)) {
+    return original_path;
   }
-
-#ifdef _WIN32
-  std::string winpath;
-  if (path.length() >= 3 && path[0] == '/') {
-    if (isalpha(path[1]) && path[2] == '/') {
-      // Transform /c/path... to c:/path...
-      winpath = FMT("{}:/{}", path[1], path.substr(3));
-      path = winpath;
-    } else if (path[2] == ':') {
-      // Transform /c:/path to c:/path
-      winpath = std::string(path.substr(1));
-      path = winpath;
-    }
-  }
-#endif
 
   // The algorithm for computing relative paths below only works for existing
   // paths. If the path doesn't exist, find the first ancestor directory that
   // does exist and assemble the path again afterwards.
 
-  std::vector<std::string> relpath_candidates;
-  const auto original_path = path;
+  std::vector<Path> relpath_candidates;
+  auto path = original_path;
   Stat path_stat;
-  while (!(path_stat = Stat::stat(std::string(path)))) {
-    path = Util::dir_name(path);
+  while (!(path_stat = Stat::stat(path.str()))) {
+    path = path.dir_name();
   }
-  const auto path_suffix = std::string(original_path.substr(path.length()));
-  const auto real_path = Util::real_path(std::string(path));
+  const auto path_suffix = original_path.substr(path.length());
+  const auto real_path = Util::real_path(path.str());
 
-  const auto add_relpath_candidates = [&](auto path) {
-    const std::string normalized_path = Util::normalize_absolute_path(path);
-    relpath_candidates.push_back(
-      Util::get_relative_path(actual_cwd, normalized_path));
+  const auto add_relpath_candidates = [&](const Path& path) {
+    relpath_candidates.push_back(path.relativ_to(actual_cwd));
     if (apparent_cwd != actual_cwd) {
-      relpath_candidates.emplace_back(
-        Util::get_relative_path(apparent_cwd, normalized_path));
+      relpath_candidates.push_back(path.relativ_to(apparent_cwd));
     }
   };
   add_relpath_candidates(path);
@@ -864,11 +837,11 @@ make_relative_path(const std::string& base_dir,
   }
 
   // No match so nothing else to do than to return the unmodified path.
-  return std::string(original_path);
+  return original_path;
 }
 
-std::string
-make_relative_path(const Context& ctx, string_view path)
+Path
+make_relative_path(const Context& ctx, const Path& path)
 {
   return make_relative_path(
     ctx.config.base_dir(), ctx.actual_cwd, ctx.apparent_cwd, path);
@@ -885,63 +858,13 @@ matches_dir_prefix_or_file(string_view dir_prefix_or_file, string_view path)
              || is_dir_separator(dir_prefix_or_file.back()));
 }
 
-std::string
+Path
 normalize_absolute_path(string_view path)
 {
   if (!util::is_absolute_path(path)) {
     return std::string(path);
   }
-
-#ifdef _WIN32
-  if (path.find("\\") != string_view::npos) {
-    std::string new_path(path);
-    std::replace(new_path.begin(), new_path.end(), '\\', '/');
-    return normalize_absolute_path(new_path);
-  }
-
-  std::string drive(path.substr(0, 2));
-  path = path.substr(2);
-#endif
-
-  std::string result = "/";
-  const size_t npos = string_view::npos;
-  size_t left = 1;
-
-  while (true) {
-    if (left >= path.length()) {
-      break;
-    }
-    const auto right = path.find('/', left);
-    string_view part = path.substr(left, right == npos ? npos : right - left);
-    if (part == "..") {
-      if (result.length() > 1) {
-        // "/x/../part" -> "/part"
-        result.erase(result.rfind('/', result.length() - 2) + 1);
-      } else {
-        // "/../part" -> "/part"
-      }
-    } else if (part == ".") {
-      // "/x/." -> "/x"
-    } else {
-      result.append(part.begin(), part.end());
-      if (result[result.length() - 1] != '/') {
-        result += '/';
-      }
-    }
-    if (right == npos) {
-      break;
-    }
-    left = right + 1;
-  }
-  if (result.length() > 1) {
-    result.erase(result.find_last_not_of('/') + 1);
-  }
-
-#ifdef _WIN32
-  return drive + result;
-#else
-  return result;
-#endif
+  return Path(path);
 }
 
 uint64_t
@@ -1093,7 +1016,7 @@ read_link(const std::string& path)
 }
 #endif
 
-std::string
+Path
 real_path(const std::string& path, bool return_empty_on_error)
 {
   size_t buffer_size = path_max(path);
@@ -1249,6 +1172,14 @@ split_into_strings(string_view string,
                    util::Tokenizer::Mode mode)
 {
   return split_into<std::string>(string, separators, mode);
+}
+
+std::vector<Path>
+split_into_paths(string_view string,
+                 const char* separators,
+                 util::Tokenizer::Mode mode)
+{
+  return split_into<Path>(string, separators, mode);
 }
 
 std::string

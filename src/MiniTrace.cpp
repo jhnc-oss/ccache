@@ -88,7 +88,8 @@ MiniTrace::~MiniTrace()
   mtr_shutdown();
 
   if (!m_args_info.output_obj.empty()) {
-    Util::copy_file(m_tmp_trace_file, m_args_info.output_obj + ".ccache-trace");
+    Util::copy_file(m_tmp_trace_file,
+                    std::string(m_args_info.output_obj) + ".ccache-trace");
   }
   Util::unlink_tmp(m_tmp_trace_file);
 }

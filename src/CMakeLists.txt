@@ -10,6 +10,7 @@ set(
   Lockfile.cpp
   Logging.cpp
   Manifest.cpp
+  Path.cpp
   ProgressBar.cpp
   Result.cpp
   ResultDumper.cpp

@@ -19,7 +19,9 @@
 #pragma once
 
 #include "NonCopyable.hpp"
+#include "Path.hpp"
 #include "Util.hpp"
+#include "fmtmacros.hpp"
 
 #include <core/Sloppiness.hpp>
 
@@ -43,8 +45,8 @@ public:
   void read();
 
   bool absolute_paths_in_stderr() const;
-  const std::string& base_dir() const;
-  const std::string& cache_dir() const;
+  const Path& base_dir() const;
+  const Path& cache_dir() const;
   const std::string& compiler() const;
   const std::string& compiler_check() const;
   CompilerType compiler_type() const;
@@ -52,7 +54,7 @@ public:
   int8_t compression_level() const;
   const std::string& cpp_extension() const;
   bool debug() const;
-  const std::string& debug_dir() const;
+  const Path& debug_dir() const;
   bool depend_mode() const;
   bool direct_mode() const;
   bool disable() const;
@@ -65,7 +67,7 @@ public:
   bool inode_cache() const;
   bool keep_comments_cpp() const;
   double limit_multiple() const;
-  const std::string& log_file() const;
+  const Path& log_file() const;
   uint64_t max_files() const;
   uint64_t max_size() const;
   const std::string& path() const;
@@ -81,8 +83,10 @@ public:
   core::Sloppiness sloppiness() const;
   bool stats() const;
   const std::string& stats_log() const;
+
   const std::string& namespace_() const;
-  const std::string& temporary_dir() const;
+
+  const Path& temporary_dir() const;
   nonstd::optional<mode_t> umask() const;
 
   void set_base_dir(const std::string& value);
@@ -102,9 +106,9 @@ public:
   void set_run_second_cpp(bool value);
 
   // Where to write configuration changes.
-  const std::string& primary_config_path() const;
+  const Path& primary_config_path() const;
   // Secondary, read-only configuration file (if any).
-  const std::string& secondary_config_path() const;
+  const Path& secondary_config_path() const;
 
   void set_primary_config_path(std::string path);
   void set_secondary_config_path(std::string path);
@@ -137,12 +141,12 @@ public:
   static void check_key_tables_consistency();
 
 private:
-  std::string m_primary_config_path;
-  std::string m_secondary_config_path;
+  Path m_primary_config_path;
+  Path m_secondary_config_path;
 
   bool m_absolute_paths_in_stderr = false;
-  std::string m_base_dir;
-  std::string m_cache_dir;
+  Path m_base_dir;
+  Path m_cache_dir;
   std::string m_compiler;
   std::string m_compiler_check = "mtime";
   CompilerType m_compiler_type = CompilerType::auto_guess;
@@ -150,7 +154,7 @@ private:
   int8_t m_compression_level = 0; // Use default level
   std::string m_cpp_extension;
   bool m_debug = false;
-  std::string m_debug_dir;
+  Path m_debug_dir;
   bool m_depend_mode = false;
   bool m_direct_mode = true;
   bool m_disable = false;
@@ -163,7 +167,7 @@ private:
   bool m_inode_cache = false;
   bool m_keep_comments_cpp = false;
   double m_limit_multiple = 0.8;
-  std::string m_log_file;
+  Path m_log_file;
   uint64_t m_max_files = 0;
   uint64_t m_max_size = 5ULL * 1000 * 1000 * 1000;
   std::string m_path;
@@ -180,7 +184,7 @@ private:
   bool m_stats = true;
   std::string m_stats_log;
   std::string m_namespace;
-  std::string m_temporary_dir;
+  Path m_temporary_dir;
   nonstd::optional<mode_t> m_umask;
 
   bool m_temporary_dir_configured_explicitly = false;
@@ -202,13 +206,13 @@ Config::absolute_paths_in_stderr() const
   return m_absolute_paths_in_stderr;
 }
 
-inline const std::string&
+inline const Path&
 Config::base_dir() const
 {
   return m_base_dir;
 }
 
-inline const std::string&
+inline const Path&
 Config::cache_dir() const
 {
   return m_cache_dir;
@@ -256,7 +260,7 @@ Config::debug() const
   return m_debug;
 }
 
-inline const std::string&
+inline const Path&
 Config::debug_dir() const
 {
   return m_debug_dir;
@@ -334,7 +338,7 @@ Config::limit_multiple() const
   return m_limit_multiple;
 }
 
-inline const std::string&
+inline const Path&
 Config::log_file() const
 {
   return m_log_file;
@@ -436,7 +440,7 @@ Config::namespace_() const
   return m_namespace;
 }
 
-inline const std::string&
+inline const Path&
 Config::temporary_dir() const
 {
   return m_temporary_dir;

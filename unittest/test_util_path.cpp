@@ -63,7 +63,7 @@ TEST_CASE("util::split_path_list")
   {
     const auto v = util::split_path_list("a/b");
     REQUIRE(v.size() == 1);
-    CHECK(v[0] == "a/b");
+    CHECK(v[0].str() == "a/b");
   }
   {
 #ifdef _WIN32
@@ -82,16 +82,16 @@ TEST_CASE("util::to_absolute_path")
   CHECK(util::to_absolute_path("/foo/bar") == "/foo/bar");
 
 #ifdef _WIN32
-  CHECK(util::to_absolute_path("C:\\foo\\bar") == "C:\\foo\\bar");
+  CHECK(util::to_absolute_path("C:\\foo\\bar").str() == "C:/foo/bar");
 #endif
 
   const auto cwd = Util::get_actual_cwd();
 
-  CHECK(util::to_absolute_path("") == cwd);
-  CHECK(util::to_absolute_path(".") == cwd);
-  CHECK(util::to_absolute_path("..") == Util::dir_name(cwd));
-  CHECK(util::to_absolute_path("foo") == FMT("{}/foo", cwd));
-  CHECK(util::to_absolute_path("../foo/bar")
+  CHECK(util::to_absolute_path("").str() == cwd.str());
+  CHECK(util::to_absolute_path(".").str() == cwd.str());
+  CHECK(util::to_absolute_path("..").str() == Util::dir_name(cwd));
+  CHECK(util::to_absolute_path("foo").str() == FMT("{}/foo", cwd.str()));
+  CHECK(util::to_absolute_path("../foo/bar").str()
         == FMT("{}/foo/bar", Util::dir_name(cwd)));
 }
 
@@ -100,10 +100,10 @@ TEST_CASE("util::to_absolute_path_no_drive")
   CHECK(util::to_absolute_path_no_drive("/foo/bar") == "/foo/bar");
 
 #ifdef _WIN32
-  CHECK(util::to_absolute_path_no_drive("C:\\foo\\bar") == "\\foo\\bar");
+  CHECK(util::to_absolute_path_no_drive("C:\\foo\\bar") == "/foo/bar");
 #endif
 
-  auto cwd = Util::get_actual_cwd();
+  std::string cwd = Util::get_actual_cwd().str();
 #ifdef _WIN32
   cwd = cwd.substr(2);
 #endif

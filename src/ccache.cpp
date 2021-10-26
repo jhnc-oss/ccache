@@ -170,7 +170,7 @@ prepare_debug_path(const std::string& debug_dir,
 {
   auto prefix = debug_dir.empty()
                   ? output_obj
-                  : debug_dir + util::to_absolute_path(output_obj);
+                  : debug_dir + util::to_absolute_path(output_obj).str();
 #ifdef _WIN32
   prefix.erase(std::remove(prefix.begin(), prefix.end(), ':'), prefix.end());
 #endif
@@ -281,7 +281,7 @@ do_remember_include_file(Context& ctx,
     return true;
   }
 
-  if (path == ctx.args_info.input_file) {
+  if (path == ctx.args_info.input_file.str()) {
     // Don't remember the input file.
     return true;
   }
@@ -426,7 +426,7 @@ static void
 print_included_files(const Context& ctx, FILE* fp)
 {
   for (const auto& item : ctx.included_files) {
-    PRINT(fp, "{}\n", item.first);
+    PRINT(fp, "{}\n", std::string(item.first));
   }
 }
 
@@ -545,27 +545,15 @@ process_preprocessed_file(Context& ctx,
         r++;
       }
       // p and q span the include file path.
-      std::string inc_path(p, q - p);
+      Path inc_path(nonstd::string_view(p, q - p));
       if (!ctx.has_absolute_include_headers) {
         ctx.has_absolute_include_headers = util::is_absolute_path(inc_path);
       }
+
       inc_path = Util::make_relative_path(ctx, inc_path);
 
-      bool should_hash_inc_path = true;
-      if (!ctx.config.hash_dir()) {
-        if (util::starts_with(inc_path, ctx.apparent_cwd)
-            && util::ends_with(inc_path, "//")) {
-          // When compiling with -g or similar, GCC adds the absolute path to
-          // CWD like this:
-          //
-          //   # 1 "CWD//"
-          //
-          // If the user has opted out of including the CWD in the hash, don't
-          // hash it. See also how debug_prefix_map is handled.
-          should_hash_inc_path = false;
-        }
-      }
-      if (should_hash_inc_path) {
+      if (ctx.config.hash_dir() && inc_path != ctx.apparent_cwd
+          && inc_path != ctx.actual_cwd) {
         hash.hash(inc_path);
       }
 
@@ -898,11 +886,13 @@ to_cache(Context& ctx,
   LOG_RAW("Running real compiler");
   MTR_BEGIN("execute", "compiler");
 
-  TemporaryFile tmp_stdout(FMT("{}/tmp.stdout", ctx.config.temporary_dir()));
+  TemporaryFile tmp_stdout(
+    FMT("{}/tmp.stdout", ctx.config.temporary_dir().c_str()));
   ctx.register_pending_tmp_file(tmp_stdout.path);
   std::string tmp_stdout_path = tmp_stdout.path;
 
-  TemporaryFile tmp_stderr(FMT("{}/tmp.stderr", ctx.config.temporary_dir()));
+  TemporaryFile tmp_stderr(
+    FMT("{}/tmp.stderr", ctx.config.temporary_dir().c_str()));
   ctx.register_pending_tmp_file(tmp_stderr.path);
   std::string tmp_stderr_path = tmp_stderr.path;
 
@@ -1024,7 +1014,7 @@ get_result_key_from_cpp(Context& ctx, Args& args, Hash& hash)
     // Run cpp on the input file to obtain the .i.
 
     TemporaryFile tmp_stdout(
-      FMT("{}/tmp.cpp_stdout", ctx.config.temporary_dir()));
+      FMT("{}/tmp.cpp_stdout", ctx.config.temporary_dir().c_str()));
     ctx.register_pending_tmp_file(tmp_stdout.path);
 
     // stdout_path needs the proper cpp_extension for the compiler to do its
@@ -1034,7 +1024,7 @@ get_result_key_from_cpp(Context& ctx, Args& args, Hash& hash)
     ctx.register_pending_tmp_file(stdout_path);
 
     TemporaryFile tmp_stderr(
-      FMT("{}/tmp.cpp_stderr", ctx.config.temporary_dir()));
+      FMT("{}/tmp.cpp_stderr", ctx.config.temporary_dir().c_str()));
     stderr_path = tmp_stderr.path;
     ctx.register_pending_tmp_file(stderr_path);
 
@@ -1293,8 +1283,7 @@ hash_common_info(const Context& ctx,
     if (!ctx.args_info.profile_path.empty()) {
       dir = ctx.args_info.profile_path;
     } else {
-      dir =
-        Util::real_path(std::string(Util::dir_name(ctx.args_info.output_obj)));
+      dir = Util::real_path(ctx.args_info.output_obj.dir_name());
     }
     string_view stem =
       Util::remove_extension(Util::base_name(ctx.args_info.output_obj));
@@ -1314,7 +1303,7 @@ hash_common_info(const Context& ctx,
   }
 
   if (!ctx.config.extra_files_to_hash().empty()) {
-    for (const std::string& path :
+    for (std::string path :
          util::split_path_list(ctx.config.extra_files_to_hash())) {
       LOG("Hashing extra file {}", path);
       hash.hash_delimiter("extrafile");
@@ -1605,7 +1594,7 @@ calculate_result_and_manifest_key(Context& ctx,
     // hash.
     const std::string profile_path =
       util::is_absolute_path(ctx.args_info.profile_path)
-        ? ctx.args_info.profile_path
+        ? std::string(ctx.args_info.profile_path)
         : FMT("{}/{}", ctx.apparent_cwd, ctx.args_info.profile_path);
     LOG("Adding profile directory {} to our hash", profile_path);
     hash.hash_delimiter("-fprofile-dir");
@@ -2046,7 +2035,7 @@ do_cache_compilation(Context& ctx, const char* const* argv)
     LOG("Split dwarf file: {}", ctx.args_info.output_dwo);
   }
 
-  LOG("Object file: {}", ctx.args_info.output_obj);
+  LOG("Object file: {}", ctx.args_info.output_obj.c_str());
   MTR_META_THREAD_NAME(ctx.args_info.output_obj.c_str());
 
   if (ctx.config.debug()) {

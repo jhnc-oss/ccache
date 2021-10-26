@@ -1,9 +1,3 @@
-SUITE_basedir_PROBE() {
-    if ! $RUN_WIN_XFAIL; then  
-        echo "CCACHE_BASEDIR is broken on windows."
-    fi
-}    
-
 SUITE_basedir_SETUP() {
     unset CCACHE_NODIRECT
 
@@ -50,8 +44,41 @@ SUITE_basedir() {
     expect_stat preprocessed_cache_hit 0
     expect_stat cache_miss 2
 
+# -------------------------------------------------------------------------
+    TEST "-include from build dir"
+
+    export CCACHE_DEBUG=1
+
+    mkdir dir1/global
+    mkdir dir1/build
+    touch dir1/global/defines.h
+
+    mkdir dir2/global
+    mkdir dir2/build
+    touch dir2/global/defines.h
+    backdate dir1/global/defines.h dir2/global/defines.h
+
+    if $HOST_OS_WINDOWS; then
+        apparent_root_dir="$(cygpath -m `pwd`/..)/run"
+    else
+        apparent_root_dir="`pwd`"
+    fi
+    cd dir1/build
+    basedir=$apparent_root_dir/dir1
+    MSYS2_ARG_CONV_EXCL="-include" CCACHE_BASEDIR="$basedir" $CCACHE_COMPILE -include$basedir/global/defines.h -I$basedir/include  -c $basedir/src/test.c
+    expect_stat direct_cache_hit 0
+    expect_stat preprocessed_cache_hit 0
+    expect_stat cache_miss 1
+
+    cd ../../dir2/build
+    basedir=$apparent_root_dir/dir2
+    MSYS2_ARG_CONV_EXCL="-include" CCACHE_BASEDIR="$basedir" $CCACHE_COMPILE -include$basedir/global/defines.h -I$basedir/include  -c $basedir/src/test.c
+    expect_stat direct_cache_hit 1
+    expect_stat preprocessed_cache_hit 0
+    expect_stat cache_miss 1
+
     # -------------------------------------------------------------------------
-if ! $HOST_OS_WINDOWS && ! $HOST_OS_CYGWIN; then
+if ! $HOST_OS_CYGWIN; then
     TEST "Path normalization"
 
     cd dir1
@@ -195,6 +222,7 @@ if ! $HOST_OS_WINDOWS && ! $HOST_OS_CYGWIN; then
 fi
 
     # -------------------------------------------------------------------------
+if $RUN_WIN_XFAIL; then
     TEST "Rewriting in stderr"
 
     cat <<EOF >stderr.h
@@ -223,7 +251,7 @@ EOF
     if grep `pwd` stderr.txt >/dev/null 2>&1; then
         test_failed "Base dir (`pwd`) found in stderr:\n`cat stderr.txt`"
     fi
-
+fi
     # -------------------------------------------------------------------------
     TEST "-MF/-MQ/-MT with absolute paths"
 
@@ -236,8 +264,6 @@ EOF
         clear_cache
 
         cd dir1
-        echo  CCACHE_BASEDIR="`pwd`" $CCACHE_COMPILE -I`pwd`/include -MD -${option}`pwd`/test.d -c src/test.c
-
         CCACHE_BASEDIR="`pwd`" $CCACHE_COMPILE -I`pwd`/include -MD -${option}`pwd`/test.d -c src/test.c
         expect_stat direct_cache_hit 0
         expect_stat preprocessed_cache_hit 0
@@ -338,6 +364,8 @@ EOF
     fi
 fi
     # -------------------------------------------------------------------------
+#  TODO: Why does this work on linux???
+if ! $HOST_OS_WINDOWS; then
     TEST "Relative PWD"
 
     cd dir1
@@ -351,8 +379,9 @@ fi
     expect_stat direct_cache_hit 1
     expect_stat preprocessed_cache_hit 0
     expect_stat cache_miss 1
-
+fi
     # -------------------------------------------------------------------------
+if ! $HOST_OS_WINDOWS; then
     TEST "Unset PWD"
 
     unset PWD
@@ -368,4 +397,5 @@ fi
     expect_stat direct_cache_hit 1
     expect_stat preprocessed_cache_hit 0
     expect_stat cache_miss 1
+fi
 }

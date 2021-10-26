@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <Path.hpp>
+
 #include <third_party/nonstd/string_view.hpp>
 
 #include <string>
@@ -35,10 +37,10 @@ bool is_full_path(nonstd::string_view path);
 
 // Split a list of paths (such as the content of $PATH on Unix platforms or
 // %PATH% on Windows platforms) into paths.
-std::vector<std::string> split_path_list(nonstd::string_view path_list);
+std::vector<Path> split_path_list(nonstd::string_view path_list);
 
 // Make `path` an absolute path.
-std::string to_absolute_path(nonstd::string_view path);
+Path to_absolute_path(nonstd::string_view path);
 
 // --- Inline implementations ---
 

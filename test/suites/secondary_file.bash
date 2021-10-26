@@ -1,18 +1,18 @@
 # This test suite verified both the file storage backend and the secondary
 # storage framework itself.
 
-SUITE_secondary_file_PROBE() {
-    if ! $RUN_WIN_XFAIL; then
-        echo "secondary_file tests are broken on Windows"
-        return
-    fi
-}
+#SUITE_secondary_file_PROBE() {
+ #   if ! $RUN_WIN_XFAIL; then
+ #       echo "secondary_file tests are broken on Windows"
+ #       return
+ #   fi
+#}
 
 SUITE_secondary_file_SETUP() {
     unset CCACHE_NODIRECT
-    if $HOST_OS_WINDOWS;then
+    if $HOST_OS_WINDOWS; then
         export MSYS2_ENV_CONV_EXCL=CCACHE_SECONDARY_STORAGE
-        export CCACHE_SECONDARY_STORAGE="file:/$(cygpath -m $PWD/secondary)"
+        export CCACHE_SECONDARY_STORAGE="file:///$(cygpath -m $PWD/secondary)"
     else
         export CCACHE_SECONDARY_STORAGE="file:$PWD/secondary"
     fi
@@ -23,6 +23,7 @@ SUITE_secondary_file() {
     # -------------------------------------------------------------------------
     TEST "Base case"
 
+    CCACHE_DEBUG=1
     $CCACHE_COMPILE -c test.c
     expect_stat direct_cache_hit 0
     expect_stat cache_miss 1
@@ -97,7 +98,12 @@ SUITE_secondary_file() {
     # -------------------------------------------------------------------------
     TEST "Two directories"
 
-    CCACHE_SECONDARY_STORAGE+=" file://$PWD/secondary_2"
+    if $HOST_OS_WINDOWS; then
+        CCACHE_SECONDARY_STORAGE+=" file:///$(cygpath -m $PWD)/secondary_2"
+    else
+        CCACHE_SECONDARY_STORAGE+=" file://$PWD/secondary_2"
+    fi
+
     mkdir secondary_2
 
     $CCACHE_COMPILE -c test.c
@@ -161,6 +167,7 @@ SUITE_secondary_file() {
     expect_file_count 3 '*' secondary # CACHEDIR.TAG + result + manifest
 
     # -------------------------------------------------------------------------
+if ! $HOST_OS_WINDOWS; then
     TEST "umask"
 
     CCACHE_SECONDARY_STORAGE="file://$PWD/secondary|umask=022"
@@ -175,11 +182,15 @@ SUITE_secondary_file() {
     $CCACHE_COMPILE -c test.c
     expect_perm secondary drwxrwxrwx
     expect_perm secondary/CACHEDIR.TAG -rw-rw-rw-
-
+fi
     # -------------------------------------------------------------------------
     TEST "Sharding"
 
-    CCACHE_SECONDARY_STORAGE="file://$PWD/secondary/*|shards=a,b(2)"
+    if $HOST_OS_WINDOWS;then
+        CCACHE_SECONDARY_STORAGE=" file:///$(cygpath -m $PWD)/secondary/*|shards=a,b(2)"
+    else
+        CCACHE_SECONDARY_STORAGE=" file://$PWD/secondary/*|shards=a,b(2)"
+    fi
 
     $CCACHE_COMPILE -c test.c
     expect_stat direct_cache_hit 0

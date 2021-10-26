@@ -47,7 +47,7 @@ TEST_CASE("Depfile::rewrite_paths")
 
   const auto content =
     FMT("foo.o: bar.c {0}/bar.h \\\n\n {1}/fie.h {0}/fum.h\n",
-        cwd,
+        nonstd::string_view(cwd),
         Util::dir_name(cwd));
 
   SUBCASE("Base directory not in dep file content")

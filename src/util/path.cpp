@@ -33,7 +33,7 @@ bool
 is_absolute_path(nonstd::string_view path)
 {
 #ifdef _WIN32
-  if (path.length() >= 2 && path[1] == ':'
+  if (path.length() > 2 && path[1] == ':'
       && (path[2] == '/' || path[2] == '\\')) {
     return true;
   }
@@ -41,13 +41,13 @@ is_absolute_path(nonstd::string_view path)
   return !path.empty() && path[0] == '/';
 }
 
-std::vector<std::string>
+std::vector<Path>
 split_path_list(nonstd::string_view path_list)
 {
-  return Util::split_into_strings(path_list, k_path_delimiter);
+  return Util::split_into_paths(path_list, k_path_delimiter);
 }
 
-std::string
+Path
 to_absolute_path(nonstd::string_view path)
 {
   if (util::is_absolute_path(path)) {

@@ -64,17 +64,38 @@ private:
   std::string get_entry_path(const Digest& key) const;
 };
 
-FileStorageBackend::FileStorageBackend(const Params& params)
-  : m_dir(params.url.path())
+Path
+create_2nd_storage_path(const SecondaryStorage::Backend::Params& params)
 {
   ASSERT(params.url.scheme() == "file");
+#ifndef _WIN32
   if (!params.url.host().empty()) {
     throw core::Fatal(FMT(
       "invalid file path \"{}\":  specifying a host (\"{}\") is not supported",
       params.url.str(),
       params.url.host()));
   }
+  return params.url.path();
 
+#else
+  /**************************************************************
+   *
+   *    On WINDOWS we use UNC path to access a network share
+   *
+   **************************************************************/
+  if (params.url.host().empty()) {
+    return params.url.path();
+    ;
+  } else {
+    return FMT("//{}/{}", params.url.host(), params.url.path());
+  }
+
+#endif
+}
+
+FileStorageBackend::FileStorageBackend(const Params& params)
+  : m_dir(create_2nd_storage_path(params))
+{
   for (const auto& attr : params.attributes) {
     if (attr.key == "layout") {
       if (attr.value == "flat") {

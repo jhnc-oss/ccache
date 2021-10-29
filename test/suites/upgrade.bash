@@ -1,10 +1,3 @@
-SUITE_upgrade_PROBE() {
-    if ! $RUN_WIN_XFAIL; then
-        echo "upgrade tests are broken on Windows. (mix between windows and posix path)"
-        return
-    fi
-}
-
 SUITE_upgrade() {
     # -------------------------------------------------------------------------
     TEST "Default cache config/directory without XDG variables"
@@ -15,6 +8,8 @@ SUITE_upgrade() {
 
     if $HOST_OS_APPLE; then
         expected=$HOME/Library/Caches/ccache
+    elif $HOST_OS_WINDOWS; then
+        expected=$(cygpath -m $HOME/ccache)
     else
         expected=$HOME/.cache/ccache
     fi
@@ -25,6 +20,8 @@ SUITE_upgrade() {
 
     if $HOST_OS_APPLE; then
         expected=$HOME/Library/Preferences/ccache/ccache.conf
+    elif $HOST_OS_WINDOWS; then
+        expected=$(cygpath -m $HOME/ccache/ccache.conf)
     else
         expected=$HOME/.config/ccache/ccache.conf
     fi
@@ -43,12 +40,20 @@ SUITE_upgrade() {
     export XDG_CONFIG_HOME=/elsewhere/config
 
     expected=$XDG_CACHE_HOME/ccache
+
+    if $HOST_OS_WINDOWS; then
+        expected=$(cygpath -m $expected)
+    fi
+
     actual=$($CCACHE -k cache_dir)
     if [ "$actual" != "$expected" ]; then
         test_failed "expected cache directory $expected, actual $actual"
     fi
 
     expected=$XDG_CONFIG_HOME/ccache/ccache.conf
+    if $HOST_OS_WINDOWS; then
+        expected=$(cygpath -m $expected)
+    fi
     actual=$($CCACHE -sv | sed -n 's/ *Primary config: *//p')
     if [ "$actual" != "$expected" ]; then
         test_failed "expected primary config $expected actual $actual"
@@ -65,12 +70,19 @@ SUITE_upgrade() {
     mkdir $HOME/.ccache
 
     expected=$HOME/.ccache
+    if $HOST_OS_WINDOWS; then
+        expected=$(cygpath -m $expected)
+    fi
+
     actual=$($CCACHE -k cache_dir)
     if [ "$actual" != "$expected" ]; then
         test_failed "expected cache directory $expected, actual $actual"
     fi
 
     expected=$HOME/.ccache/ccache.conf
+    if $HOST_OS_WINDOWS; then
+        expected=$(cygpath -m $expected)
+    fi
     actual=$($CCACHE -sv | sed -n 's/ *Primary config: *//p')
     if [ "$actual" != "$expected" ]; then
         test_failed "expected primary config $expected actual $actual"
@@ -86,18 +98,26 @@ SUITE_upgrade() {
     export XDG_CONFIG_HOME=/elsewhere/config
 
     expected=$CCACHE_DIR
+    if $HOST_OS_WINDOWS; then
+        expected=$(cygpath -m $expected)
+    fi
     actual=$($CCACHE -k cache_dir)
     if [ "$actual" != "$expected" ]; then
         test_failed "expected cache directory $expected, actual $actual"
     fi
 
     expected=$CCACHE_DIR/ccache.conf
+    if $HOST_OS_WINDOWS; then
+        expected=$(cygpath -m $expected)
+    fi
     actual=$($CCACHE -sv | sed -n 's/ *Primary config: *//p')
     if [ "$actual" != "$expected" ]; then
         test_failed "expected primary config $expected actual $actual"
     fi
 
     # -------------------------------------------------------------------------
+    # This feature is broken on windows
+if $RUN_WIN_XFAIL; then
     TEST "Cache config/directory with empty CCACHE_DIR"
 
     # Empty (but set) CCACHE_DIR means "use defaults" and should thus override
@@ -112,14 +132,21 @@ SUITE_upgrade() {
     echo 'cache_dir = /nowhere' > $CCACHE_CONFIGPATH2
 
     expected=$XDG_CACHE_HOME/ccache
+    if $HOST_OS_WINDOWS; then
+        expected=$(cygpath -m $expected)
+    fi
     actual=$($CCACHE -k cache_dir)
     if [ "$actual" != "$expected" ]; then
         test_failed "expected cache directory $expected, actual $actual"
     fi
 
     expected=$XDG_CONFIG_HOME/ccache/ccache.conf
+    if $HOST_OS_WINDOWS; then
+        expected=$(cygpath -m $expected)
+    fi
     actual=$($CCACHE -sv | sed -n 's/ *Primary config: *//p')
     if [ "$actual" != "$expected" ]; then
         test_failed "expected primary config $expected actual $actual"
     fi
+fi
 }

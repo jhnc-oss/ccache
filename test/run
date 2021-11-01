@@ -229,8 +229,8 @@ expect_equal_text_content() {
             if $verbose; then
                 echo "WARNING: $1 and $2 with differ line endings."
             fi
-        elif $HOST_OS_WINDOWS  && diff -u --strip-trailing-cr --ignore-trailing-space "$1" "$2" > /dev/null ; then
-            echo "WARNING: $1 and $2 with differ line endings and additional carriage return character."
+    #    elif $HOST_OS_WINDOWS  && diff -u --strip-trailing-cr --ignore-trailing-space "$1" "$2" > /dev/null ; then
+    #        echo "WARNING: $1 and $2 with differ line endings and additional carriage return character."
         else
             test_failed_internal "$1 and $2 differ: $(echo; diff -u "$1" "$2")"
         fi

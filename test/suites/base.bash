@@ -371,13 +371,14 @@ fi
     expect_exists test1.o.ccache-log
 
     # -------------------------------------------------------------------------
-if $RUN_WIN_XFAIL;then
-# TODO: Leading slash is missing. (debugdirC/... instead of debugdir/C/... )
     TEST "CCACHE_DEBUGDIR"
 
     CCACHE_DEBUG=1 CCACHE_DEBUGDIR=debugdir $CCACHE_COMPILE -c test1.c
-    expect_contains debugdir"$(pwd -P)"/test1.o.ccache-log "Result: cache_miss"
-fi
+    if $HOST_OS_WINDOWS; then
+        expect_contains debugdir"$(pwd -W | sed 's/.://g' )"/test1.o.ccache-log "Result: cache_miss"
+    else
+        expect_contains debugdir"$(pwd -P)"/test1.o.ccache-log "Result: cache_miss"
+    fi
     # -------------------------------------------------------------------------
     TEST "CCACHE_DISABLE"
 

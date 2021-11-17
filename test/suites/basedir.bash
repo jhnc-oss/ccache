@@ -222,7 +222,6 @@ if ! $HOST_OS_WINDOWS && ! $HOST_OS_CYGWIN; then
 fi
 
     # -------------------------------------------------------------------------
-if $RUN_WIN_XFAIL; then
     TEST "Rewriting in stderr"
 
     cat <<EOF >stderr.h
@@ -251,7 +250,6 @@ EOF
     if grep `pwd` stderr.txt >/dev/null 2>&1; then
         test_failed "Base dir (`pwd`) found in stderr:\n`cat stderr.txt`"
     fi
-fi
     # -------------------------------------------------------------------------
     TEST "-MF/-MQ/-MT with absolute paths"
 
@@ -320,7 +318,6 @@ fi
         cd ..
     done
     # -------------------------------------------------------------------------
-if $RUN_WIN_XFAIL; then
     TEST "Absolute paths in stderr"
 
     cat <<EOF >test.c
@@ -362,7 +359,6 @@ EOF
         expect_stat cache_miss 1
         expect_equal_content reference.stderr ccache.stderr
     fi
-fi
     # -------------------------------------------------------------------------
 #  TODO: Why does this work on linux???
 if ! $HOST_OS_WINDOWS; then

@@ -2011,6 +2011,12 @@ do_cache_compilation(Context& ctx, const char* const* argv)
   }
   DEBUG_ASSERT(ctx.config.compiler_type() != CompilerType::auto_guess);
 
+  if (!ctx.config.base_dir().empty()
+      && ctx.config.compiler_type() == CompilerType::cl) {
+    LOG_RAW("disable base_dir when cl is used as compiler.");
+    ctx.config.set_base_dir("");
+  }
+
   if (ctx.config.disable()) {
     LOG_RAW("ccache is disabled");
     return nonstd::make_unexpected(Statistic::none);

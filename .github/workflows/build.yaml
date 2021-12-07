@@ -164,7 +164,7 @@ jobs:
             compiler: clang
 
           - sys: ucrt64
-            env: ucrt64-x86_64
+            env: ucrt-x86_64
             compiler: gcc
 
     name: 'Windows ${{ matrix.config.sys }} ${{ matrix.config.compiler }}'

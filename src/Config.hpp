@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021 Joel Rosdahl and other contributors
+// Copyright (C) 2019-2022 Joel Rosdahl and other contributors
 //
 // See doc/AUTHORS.adoc for a complete list of contributors.
 //
@@ -33,7 +33,7 @@
 #include <string>
 #include <unordered_map>
 
-enum class CompilerType { auto_guess, clang, gcc, nvcc, other, pump, cl };
+enum class CompilerType { auto_guess, clang, clang_cl, gcc, msvc, nvcc, other };
 
 std::string compiler_type_to_string(CompilerType compiler_type);
 
@@ -88,6 +88,12 @@ public:
 
   const Path& temporary_dir() const;
   nonstd::optional<mode_t> umask() const;
+
+  // Return true for Clang and clang-cl.
+  bool is_compiler_group_clang() const;
+
+  // Return true for MSVC (cl.exe) and clang-cl.
+  bool is_compiler_group_msvc() const;
 
   void set_base_dir(const std::string& value);
   void set_cache_dir(const std::string& value);
@@ -234,6 +240,20 @@ inline CompilerType
 Config::compiler_type() const
 {
   return m_compiler_type;
+}
+
+inline bool
+Config::is_compiler_group_clang() const
+{
+  return m_compiler_type == CompilerType::clang
+         || m_compiler_type == CompilerType::clang_cl;
+}
+
+inline bool
+Config::is_compiler_group_msvc() const
+{
+  return m_compiler_type == CompilerType::msvc
+         || m_compiler_type == CompilerType::clang_cl;
 }
 
 inline bool

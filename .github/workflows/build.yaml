@@ -215,6 +215,57 @@ jobs:
           name: ${{ matrix.config.sys}}-${{ matrix.config.env }}-${{ matrix.config.compiler }}-testdir.tar.xz
           path: testdir.tar.xz
 
+build_and_test_msys2:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+
+    name: 'Windows MSYS gcc'
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: 'MSYS Setup MSYS2'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MSYS
+          update: true
+          install: >-
+            git
+            diffutils
+            tar
+            base-devel
+            cmake
+            ninja
+            gcc
+
+      - name: setup env
+        run: |
+          echo "CC=gcc" >> $GITHUB_ENV
+          echo "CXX=g++" >> $GITHUB_ENV
+          
+
+      - name: Get source
+        uses: actions/checkout@v2
+
+      - name: Build and test
+        run: ci/build
+        continue-on-error: ${{ steps.build-and-test.outputs.exit_status == 8 }}
+        env:
+          ENABLE_CACHE_CLEANUP_TESTS: true
+          CMAKE_PARAMS: -DCMAKE_BUILD_TYPE=CI -DREDIS_STORAGE_BACKEND=OFF
+
+      - name: Collect testdir from failed tests
+        if: failure()
+        run: ci/collect-testdir
+
+      - name: Upload testdir from failed tests
+        if: failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.config.sys}}-${{ matrix.config.env }}-${{ matrix.config.compiler }}-testdir.tar.xz
+          path: testdir.tar.xz
+
   specific_tests:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}

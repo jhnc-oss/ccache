@@ -215,7 +215,7 @@ jobs:
           name: ${{ matrix.config.sys}}-${{ matrix.config.env }}-${{ matrix.config.compiler }}-testdir.tar.xz
           path: testdir.tar.xz
 
-build_and_test_msys2:
+  build_and_test_msys2:
     runs-on: windows-latest
     strategy:
       fail-fast: false
